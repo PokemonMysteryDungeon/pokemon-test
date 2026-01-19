@@ -6,8 +6,8 @@
     <title>포켓몬 불가사의 던전 성격 테스트</title>
     <style>
         :root { --main-color: #3b4cca; --accent-color: #ffcc00; }
-        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f7f9fc; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        #quiz-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 600px; text-align: center; }
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f7f9fc; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
+        #quiz-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 600px; text-align: center; position: relative; z-index: 10; }
         .progress-container { width: 100%; background-color: #eee; border-radius: 10px; margin-bottom: 20px; }
         #progress-bar { width: 0%; height: 10px; background-color: var(--main-color); border-radius: 10px; transition: width 0.3s; }
         h1 { color: var(--main-color); font-size: 1.5rem; margin-bottom: 30px; }
@@ -20,6 +20,8 @@
     </style>
 </head>
 <body>
+
+<div id="player" style="position: absolute; left: -9999px;"></div>
 
 <div id="quiz-container">
     <div id="gender-section">
@@ -46,7 +48,35 @@
 </div>
 
 <script>
-    // 원작 질문 리스트 (64개)
+    // YouTube IFrame API 비동기 로드
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var player;
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+            height: '0',
+            width: '0',
+            videoId: 'P3fiq9MNrEA', // 요청하신 영상 ID
+            playerVars: {
+                'autoplay': 0,
+                'controls': 0,
+                'loop': 1,
+                'playlist': 'P3fiq9MNrEA' // 반복 재생 설정
+            },
+            events: {
+                'onReady': onPlayerReady
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        // 플레이어 준비 완료 (브라우저 정책상 바로 재생은 불가)
+    }
+
+    // --- 질문 데이터 및 로직 ---
     const allQuestions = [
         { q: "비밀을 무심코 누설해버린 적이 있는가?", a: [{t: "있다", s: {Rash: 4, Lonely: 4}}, {t: "없다", s: {Hardy: 2}}] },
         { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "절반은 쓰고 절반은 모은다", s: {Calm: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
@@ -114,7 +144,6 @@
         { q: "길에서 좋은 냄새가 난다!", a: [{t: "상상한다", s: {Docile: 4}}, {t: "냄새를 따라간다", s: {Naive: 4, Rash: 2}}, {t: "배가 고파진다", s: {Impish: 4}}] }
     ];
 
-    // 성별/성격별 매칭 테이블 (요청하신 리스트 적용)
     const pokemonData = {
         male: {
             Lonely: "이상해씨", Docile: "파이리", Quirky: "꼬부기", Brave: "피카츄",
@@ -124,16 +153,11 @@
         },
         female: {
             Docile: "이상해씨", Brave: "파이리", Bold: "꼬부기", Hasty: "피카츄",
-            Hasty_2: "냐옹", // 냐옹 중복 처리 (원작 반영)
-            Quiet: "치코리타", Calm: "브케인", Sassy: "리아코", Hardy: "나무지기",
-            Rash: "아차모", Lonely: "물짱이", Naive: "에나비", Timid: "모부기",
-            Impish: "불꽃숭이", Quirky: "팽도리", Jolly: "먹고자"
+            Naive: "에나비", Quiet: "치코리타", Calm: "브케인", Sassy: "리아코", 
+            Hardy: "나무지기", Rash: "아차모", Lonely: "물짱이", Timid: "모부기",
+            Impish: "불꽃숭이", Quirky: "팽도리", Jolly: "먹고자", Hasty: "냐옹"
         }
     };
-
-    // 냐옹 성별 중복 특이케이스(조급한)를 위해 여성용 보정
-    pokemonData.female["Hasty"] = "피카츄"; 
-    // 실제 원작 데이터상 냐옹-여성도 조급한 이므로, 피카츄와 겹칠 경우 랜덤성을 위해 유지하거나 조정
 
     const koreanTypeMap = {
         Hardy: "강건한", Docile: "온순한", Brave: "용감한", Jolly: "유쾌한",
@@ -149,10 +173,15 @@
 
     function startQuiz(gender) {
         userGender = gender;
+        
+        // 버튼 클릭 시 유튜브 음악 재생 시작
+        if (player && player.playVideo) {
+            player.playVideo();
+        }
+
         document.getElementById("gender-section").classList.add("hidden");
         document.getElementById("quiz-section").classList.remove("hidden");
         
-        // 초기화
         Object.keys(koreanTypeMap).forEach(type => scores[type] = 0);
         selectedQuestions = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 16);
         render();
@@ -204,12 +233,6 @@
         
         const topType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
         
-        // 예외처리: 여성의 경우 '조급한'이 나오면 피카츄/냐옹 중 냐옹 비율을 위해 냐옹 우선 배정 로직 (원작 고증 필요시)
-        let resultPokemon = pokemonData[userGender][topType];
-        
-        // 데이터 보정: 여성-조급한 성격이 피카츄와 냐옹 둘 다 있으므로 냐옹으로 리스트 반영
-        if(userGender === 'female' && topType === 'Hasty') resultPokemon = "피카츄(혹은 냐옹)";
-
         document.getElementById("personality-type").innerText = koreanTypeMap[topType];
         document.getElementById("pokemon-name").innerText = pokemonData[userGender][topType] || "신비한 포켓몬";
     }
