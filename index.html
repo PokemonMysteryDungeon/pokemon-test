@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>포켓몬 불가사의 던전 성격 테스트</title>
+    <title>포켓몬 불가사의 던전 성격 테스트 (20문항)</title>
     <style>
         :root { --main-color: #3b4cca; --accent-color: #ffcc00; }
         body { font-family: 'Malgun Gothic', sans-serif; background-color: #f7f9fc; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
@@ -48,30 +48,21 @@
 </div>
 
 <script>
-    // YouTube IFrame API 비동기 로드
     var tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     var firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
     var player;
-    const VIDEO_ID = 'ehI75lWfXhw'; // 새로 요청하신 영상 ID
+    const VIDEO_ID = 'ehI75lWfXhw';
 
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
-            height: '0',
-            width: '0',
-            videoId: VIDEO_ID,
-            playerVars: {
-                'autoplay': 0,
-                'controls': 0,
-                'loop': 1,
-                'playlist': VIDEO_ID // 반복 재생을 위한 설정
-            }
+            height: '0', width: '0', videoId: VIDEO_ID,
+            playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': VIDEO_ID }
         });
     }
 
-    // --- 질문 데이터 및 로직 생략 없이 유지 ---
     const allQuestions = [
         { q: "비밀을 무심코 누설해버린 적이 있는가?", a: [{t: "있다", s: {Rash: 4, Lonely: 4}}, {t: "없다", s: {Hardy: 2}}] },
         { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "절반은 쓰고 절반은 모은다", s: {Calm: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
@@ -140,56 +131,33 @@
     ];
 
     const pokemonData = {
-        male: {
-            Lonely: "이상해씨", Docile: "파이리", Quirky: "꼬부기", Brave: "피카츄",
-            Sassy: "냐옹", Calm: "치코리타", Timid: "브케인", Jolly: "리아코",
-            Quiet: "나무지기", Hardy: "아차모", Rash: "물짱이", Hasty: "에나비",
-            Bold: "모부기", Naive: "불꽃숭이", Impish: "팽도리", Relaxed: "먹고자"
-        },
-        female: {
-            Docile: "이상해씨", Brave: "파이리", Bold: "꼬부기", Hasty: "피카츄",
-            Naive: "에나비", Quiet: "치코리타", Calm: "브케인", Sassy: "리아코", 
-            Hardy: "나무지기", Rash: "아차모", Lonely: "물짱이", Timid: "모부기",
-            Impish: "불꽃숭이", Quirky: "팽도리", Jolly: "먹고자", Hasty: "냐옹"
-        }
+        male: { Lonely: "이상해씨", Docile: "파이리", Quirky: "꼬부기", Brave: "피카츄", Sassy: "냐옹", Calm: "치코리타", Timid: "브케인", Jolly: "리아코", Quiet: "나무지기", Hardy: "아차모", Rash: "물짱이", Hasty: "에나비", Bold: "모부기", Naive: "불꽃숭이", Impish: "팽도리", Relaxed: "먹고자" },
+        female: { Docile: "이상해씨", Brave: "파이리", Bold: "꼬부기", Hasty: "피카츄", Naive: "에나비", Quiet: "치코리타", Calm: "브케인", Sassy: "리아코", Hardy: "나무지기", Rash: "아차모", Lonely: "물짱이", Timid: "모부기", Impish: "불꽃숭이", Quirky: "팽도리", Jolly: "먹고자", Hasty: "냐옹" }
     };
 
-    const koreanTypeMap = {
-        Hardy: "강건한", Docile: "온순한", Brave: "용감한", Jolly: "유쾌한",
-        Impish: "장난꾸러기", Naive: "순진한", Bold: "과감한", Timid: "소심한",
-        Hasty: "조급한", Sassy: "건방진", Quiet: "내성적", Relaxed: "느긋한",
-        Rash: "무모한", Quirky: "변덕스러운", Lonely: "고독한", Calm: "차분한"
-    };
+    const koreanTypeMap = { Hardy: "강건한", Docile: "온순한", Brave: "용감한", Jolly: "유쾌한", Impish: "장난꾸러기", Naive: "순진한", Bold: "과감한", Timid: "소심한", Hasty: "조급한", Sassy: "건방진", Quiet: "내성적", Relaxed: "느긋한", Rash: "무모한", Quirky: "변덕스러운", Lonely: "고독한", Calm: "차분한" };
 
-    let userGender = '';
-    let selectedQuestions = [];
-    let currentIdx = 0;
-    let scores = {};
+    let userGender = '', selectedQuestions = [], currentIdx = 0, scores = {};
 
     function startQuiz(gender) {
         userGender = gender;
-        
-        // 배경음악 재생
-        if (player && player.playVideo) {
-            player.playVideo();
-        }
-
+        if (player && player.playVideo) player.playVideo();
         document.getElementById("gender-section").classList.add("hidden");
         document.getElementById("quiz-section").classList.remove("hidden");
-        
         Object.keys(koreanTypeMap).forEach(type => scores[type] = 0);
-        selectedQuestions = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 16);
+        // 총 20개 질문을 랜덤으로 뽑되, 동점자 처리를 위해 21개를 뽑아둡니다.
+        selectedQuestions = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 21);
         render();
     }
 
     function render() {
         const q = selectedQuestions[currentIdx];
-        const isExtra = currentIdx >= 15;
-        const progress = isExtra ? 100 : (currentIdx / 15) * 100;
+        const isExtra = currentIdx >= 20; // 21번째 질문일 때
+        const progress = isExtra ? 100 : (currentIdx / 20) * 100;
         
         document.getElementById("progress-bar").style.width = `${progress}%`;
         const statusText = document.getElementById("status-text");
-        statusText.innerText = isExtra ? `[동점자 발생!] 판별 질문` : `질문 ${currentIdx + 1} / 15`;
+        statusText.innerText = isExtra ? `[동점자 발생!] 판별 질문` : `질문 ${currentIdx + 1} / 20`;
         statusText.style.color = isExtra ? "red" : "#666";
 
         document.getElementById("question-text").innerText = q.q;
@@ -210,12 +178,12 @@
     }
 
     function checkNext() {
-        if (currentIdx === 15) {
+        if (currentIdx === 20) { // 메인 20문항 종료 시점
             const maxVal = Math.max(...Object.values(scores));
             const winners = Object.keys(scores).filter(t => scores[t] === maxVal);
-            if (winners.length > 1) render();
+            if (winners.length > 1) render(); // 동점자면 21번째 질문
             else showResult();
-        } else if (currentIdx >= 16) {
+        } else if (currentIdx >= 21) { // 동점자 질문까지 끝났을 때
             showResult();
         } else {
             render();
