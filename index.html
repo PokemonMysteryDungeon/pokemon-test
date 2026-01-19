@@ -55,28 +55,23 @@
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
     var player;
+    const VIDEO_ID = 'ehI75lWfXhw'; // 새로 요청하신 영상 ID
+
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
             height: '0',
             width: '0',
-            videoId: 'P3fiq9MNrEA', // 요청하신 영상 ID
+            videoId: VIDEO_ID,
             playerVars: {
                 'autoplay': 0,
                 'controls': 0,
                 'loop': 1,
-                'playlist': 'P3fiq9MNrEA' // 반복 재생 설정
-            },
-            events: {
-                'onReady': onPlayerReady
+                'playlist': VIDEO_ID // 반복 재생을 위한 설정
             }
         });
     }
 
-    function onPlayerReady(event) {
-        // 플레이어 준비 완료 (브라우저 정책상 바로 재생은 불가)
-    }
-
-    // --- 질문 데이터 및 로직 ---
+    // --- 질문 데이터 및 로직 생략 없이 유지 ---
     const allQuestions = [
         { q: "비밀을 무심코 누설해버린 적이 있는가?", a: [{t: "있다", s: {Rash: 4, Lonely: 4}}, {t: "없다", s: {Hardy: 2}}] },
         { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "절반은 쓰고 절반은 모은다", s: {Calm: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
@@ -174,7 +169,7 @@
     function startQuiz(gender) {
         userGender = gender;
         
-        // 버튼 클릭 시 유튜브 음악 재생 시작
+        // 배경음악 재생
         if (player && player.playVideo) {
             player.playVideo();
         }
@@ -230,9 +225,7 @@
     function showResult() {
         document.getElementById("quiz-section").classList.add("hidden");
         document.getElementById("result-section").classList.remove("hidden");
-        
         const topType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
-        
         document.getElementById("personality-type").innerText = koreanTypeMap[topType];
         document.getElementById("pokemon-name").innerText = pokemonData[userGender][topType] || "신비한 포켓몬";
     }
