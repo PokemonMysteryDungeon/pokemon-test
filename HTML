@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포켓몬 불가사의 던전 성격 테스트</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f0f8ff; text-align: center; padding: 50px; }
+        #quiz-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; }
+        .hidden { display: none; }
+        button { background-color: #ffcc00; border: none; padding: 10px 20px; margin: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #ffaa00; }
+        h1 { color: #3b4cca; }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <h1>🌀 성격 진단 테스트</h1>
+    <div id="question-section">
+        <p id="question-text">질문이 여기에 표시됩니다.</p>
+        <div id="answer-buttons"></div>
+    </div>
+    
+    <div id="result-section" class="hidden">
+        <h2>당신의 성격은... <span id="personality-type"></span>!</h2>
+        <p>당신과 어울리는 포켓몬은:</p>
+        <h1 id="pokemon-name"></h1>
+        <button onclick="location.reload()">다시 하기</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "모르는 사람이 말을 걸어왔다. 당신은?", a: [{text: "반갑게 대답한다", type: "Jolly"}, {text: "경계하며 짧게 답한다", type: "Timid"}] },
+        { q: "길에 지갑이 떨어져 있다! 어떻게 할까?", a: [{text: "경찰서에 가져다준다", type: "Docile"}, {text: "슬쩍 내용물을 확인한다", type: "Impish"}] },
+        { q: "내일은 드디어 기다리던 소풍날! 잠이 오지 않을 때 당신은?", a: [{text: "억지로라도 눈을 감는다", type: "Brave"}, {text: "신나서 밤을 지새운다", type: "Jolly"}] }
+    ];
+
+    const pokemonMap = {
+        "Jolly": "꼬부기 (해맑음)",
+        "Timid": "파이리 (조심스러움)",
+        "Docile": "이상해씨 (고분고분함)",
+        "Impish": "피카츄 (장난꾸러기)",
+        "Brave": "리아코 (용감함)"
+    };
+
+    let currentIdx = 0;
+    let scores = {};
+
+    function showQuestion() {
+        const qSection = document.getElementById("question-text");
+        const btnSection = document.getElementById("answer-buttons");
+        qSection.innerText = questions[currentIdx].q;
+        btnSection.innerHTML = "";
+
+        questions[currentIdx].a.forEach(answer => {
+            const btn = document.createElement("button");
+            btn.innerText = answer.text;
+            btn.onclick = () => nextQuestion(answer.type);
+            btn.appendChild(document.createElement("br"));
+            btn.appendChild(document.createTextNode("")); // 줄바꿈용
+            btnSection.appendChild(btn);
+        });
+    }
+
+    function nextQuestion(type) {
+        scores[type] = (scores[type] || 0) + 1;
+        currentIdx++;
+        if (currentIdx < questions.length) {
+            showQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById("question-section").classList.add("hidden");
+        const resultSection = document.getElementById("result-section");
+        resultSection.classList.remove("hidden");
+
+        const topType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+        document.getElementById("personality-type").innerText = topType;
+        document.getElementById("pokemon-name").innerText = pokemonMap[topType] || "이브이";
+    }
+
+    showQuestion();
+</script>
+
+</body>
+</html>
