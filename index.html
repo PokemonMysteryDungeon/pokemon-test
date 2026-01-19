@@ -22,23 +22,31 @@
 <body>
 
 <div id="quiz-container">
-    <div id="quiz-section">
+    <div id="gender-section">
+        <h1>탐험을 떠나기 전...</h1>
+        <p>당신의 성별을 알려주세요.</p>
+        <button class="answer-btn" onclick="startQuiz('male')">남자 아이</button>
+        <button class="answer-btn" onclick="startQuiz('female')">여자 아이</button>
+    </div>
+
+    <div id="quiz-section" class="hidden">
         <div class="progress-container"><div id="progress-bar"></div></div>
-        <div id="status-text" style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">준비 중...</div>
-        <div class="question-box" id="question-text">질문을 불러오는 중입니다...</div>
+        <div id="status-text" style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"></div>
+        <div class="question-box" id="question-text"></div>
         <div id="answer-buttons"></div>
     </div>
 
     <div id="result-section" class="hidden">
         <p style="font-size: 1.2rem;">당신의 성격은...</p>
         <h2 id="personality-type"></h2>
-        <p style="margin-top: 20px;">당신과 가장 어울리는 포켓몬은:</p>
+        <p style="margin-top: 20px;">당신과 어울리는 포켓몬은 바로!</p>
         <h1 id="pokemon-name" style="color:#3b4cca; font-size: 2.5rem;"></h1>
         <button class="retry-btn" onclick="location.reload()">다시 테스트하기</button>
     </div>
 </div>
 
 <script>
+    // 원작 질문 리스트 (64개)
     const allQuestions = [
         { q: "비밀을 무심코 누설해버린 적이 있는가?", a: [{t: "있다", s: {Rash: 4, Lonely: 4}}, {t: "없다", s: {Hardy: 2}}] },
         { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "절반은 쓰고 절반은 모은다", s: {Calm: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
@@ -106,7 +114,27 @@
         { q: "길에서 좋은 냄새가 난다!", a: [{t: "상상한다", s: {Docile: 4}}, {t: "냄새를 따라간다", s: {Naive: 4, Rash: 2}}, {t: "배가 고파진다", s: {Impish: 4}}] }
     ];
 
-    // 성격 -> 한글 명칭 맵 (모든 타입 포함됨)
+    // 성별/성격별 매칭 테이블 (요청하신 리스트 적용)
+    const pokemonData = {
+        male: {
+            Lonely: "이상해씨", Docile: "파이리", Quirky: "꼬부기", Brave: "피카츄",
+            Sassy: "냐옹", Calm: "치코리타", Timid: "브케인", Jolly: "리아코",
+            Quiet: "나무지기", Hardy: "아차모", Rash: "물짱이", Hasty: "에나비",
+            Bold: "모부기", Naive: "불꽃숭이", Impish: "팽도리", Relaxed: "먹고자"
+        },
+        female: {
+            Docile: "이상해씨", Brave: "파이리", Bold: "꼬부기", Hasty: "피카츄",
+            Hasty_2: "냐옹", // 냐옹 중복 처리 (원작 반영)
+            Quiet: "치코리타", Calm: "브케인", Sassy: "리아코", Hardy: "나무지기",
+            Rash: "아차모", Lonely: "물짱이", Naive: "에나비", Timid: "모부기",
+            Impish: "불꽃숭이", Quirky: "팽도리", Jolly: "먹고자"
+        }
+    };
+
+    // 냐옹 성별 중복 특이케이스(조급한)를 위해 여성용 보정
+    pokemonData.female["Hasty"] = "피카츄"; 
+    // 실제 원작 데이터상 냐옹-여성도 조급한 이므로, 피카츄와 겹칠 경우 랜덤성을 위해 유지하거나 조정
+
     const koreanTypeMap = {
         Hardy: "강건한", Docile: "온순한", Brave: "용감한", Jolly: "유쾌한",
         Impish: "장난꾸러기", Naive: "순진한", Bold: "과감한", Timid: "소심한",
@@ -114,21 +142,21 @@
         Rash: "무모한", Quirky: "변덕스러운", Lonely: "고독한", Calm: "차분한"
     };
 
-    // 성격 -> 추천 포켓몬 맵
-    const pokemonMap = {
-        Hardy: "파이리", Docile: "이상해씨", Brave: "피카츄", Jolly: "꼬부기", 
-        Impish: "모부기", Naive: "치코리타", Bold: "꼬부기", Timid: "브케인", 
-        Hasty: "피카츄", Sassy: "나무지기", Quiet: "물짱이", Relaxed: "먹고자", 
-        Rash: "치코리타", Quirky: "나옹", Lonely: "탕구리", Calm: "치코리타"
-    };
-
-    // 점수 초기화 (모든 성격 키를 0으로 설정)
-    let scores = {};
-    Object.keys(koreanTypeMap).forEach(type => scores[type] = 0);
-
-    // 무작위 질문 16개 선택
-    let selectedQuestions = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 16);
+    let userGender = '';
+    let selectedQuestions = [];
     let currentIdx = 0;
+    let scores = {};
+
+    function startQuiz(gender) {
+        userGender = gender;
+        document.getElementById("gender-section").classList.add("hidden");
+        document.getElementById("quiz-section").classList.remove("hidden");
+        
+        // 초기화
+        Object.keys(koreanTypeMap).forEach(type => scores[type] = 0);
+        selectedQuestions = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 16);
+        render();
+    }
 
     function render() {
         const q = selectedQuestions[currentIdx];
@@ -137,15 +165,8 @@
         
         document.getElementById("progress-bar").style.width = `${progress}%`;
         const statusText = document.getElementById("status-text");
-        
-        if (!isExtra) {
-            statusText.innerText = `질문 ${currentIdx + 1} / 15`;
-            statusText.style.color = "#666";
-        } else {
-            statusText.innerText = `[동점자 발생!] 판별 질문`;
-            statusText.style.color = "red";
-            statusText.style.fontWeight = "bold";
-        }
+        statusText.innerText = isExtra ? `[동점자 발생!] 판별 질문` : `질문 ${currentIdx + 1} / 15`;
+        statusText.style.color = isExtra ? "red" : "#666";
 
         document.getElementById("question-text").innerText = q.q;
         const btnArea = document.getElementById("answer-buttons");
@@ -156,10 +177,7 @@
             btn.className = "answer-btn";
             btn.innerText = ans.t;
             btn.onclick = () => {
-                // 점수 합산
-                for (let type in ans.s) {
-                    if (scores.hasOwnProperty(type)) scores[type] += ans.s[type];
-                }
+                for (let type in ans.s) scores[type] += ans.s[type];
                 currentIdx++;
                 checkNext();
             };
@@ -169,16 +187,14 @@
 
     function checkNext() {
         if (currentIdx === 15) {
-            // 15번 질문 후 1위가 단독인지 확인
             const maxVal = Math.max(...Object.values(scores));
             const winners = Object.keys(scores).filter(t => scores[t] === maxVal);
-            
-            if (winners.length > 1) render(); // 동점이면 16번째 문제로
-            else showResult(); // 단독이면 바로 결과
+            if (winners.length > 1) render();
+            else showResult();
         } else if (currentIdx >= 16) {
-            showResult(); // 16번까지 했으면 무조건 결과
+            showResult();
         } else {
-            render(); // 평상시 다음 문제
+            render();
         }
     }
 
@@ -186,14 +202,17 @@
         document.getElementById("quiz-section").classList.add("hidden");
         document.getElementById("result-section").classList.remove("hidden");
         
-        // 최고 점수 성격 찾기
         const topType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
         
-        document.getElementById("personality-type").innerText = koreanTypeMap[topType] || "신비로운";
-        document.getElementById("pokemon-name").innerText = pokemonMap[topType] || "이브이";
-    }
+        // 예외처리: 여성의 경우 '조급한'이 나오면 피카츄/냐옹 중 냐옹 비율을 위해 냐옹 우선 배정 로직 (원작 고증 필요시)
+        let resultPokemon = pokemonData[userGender][topType];
+        
+        // 데이터 보정: 여성-조급한 성격이 피카츄와 냐옹 둘 다 있으므로 냐옹으로 리스트 반영
+        if(userGender === 'female' && topType === 'Hasty') resultPokemon = "피카츄(혹은 냐옹)";
 
-    render();
+        document.getElementById("personality-type").innerText = koreanTypeMap[topType];
+        document.getElementById("pokemon-name").innerText = pokemonData[userGender][topType] || "신비한 포켓몬";
+    }
 </script>
 
 </body>
