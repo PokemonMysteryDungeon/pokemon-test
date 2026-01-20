@@ -5,31 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>포켓몬 불가사의 던전 성격 테스트</title>
     <style>
-        :root { --main-color: #3b4cca; --accent-color: #ffcc00; }
-        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f7f9fc; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
-        #quiz-container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 600px; text-align: center; position: relative; z-index: 10; }
-        
-        /* 진행바 */
-        .progress-container { width: 100%; background-color: #eee; border-radius: 10px; margin-bottom: 20px; }
-        #progress-bar { width: 0%; height: 10px; background-color: var(--main-color); border-radius: 10px; transition: width 0.3s; }
-        
-        h1 { color: var(--main-color); font-size: 1.5rem; margin-bottom: 30px; }
-        .question-box { font-size: 1.2rem; font-weight: bold; margin-bottom: 30px; line-height: 1.5; min-height: 80px; }
-        
-        /* 버튼 스타일 */
-        .answer-btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #ddd; border-radius: 10px; background: white; cursor: pointer; font-size: 1rem; transition: 0.2s; outline: none; }
-        .answer-btn:hover { background-color: var(--accent-color); border-color: var(--accent-color); font-weight: bold; }
-        
-        .hidden { display: none; }
-        
-        /* 볼륨 조절바 스타일 */
-        .volume-control { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ddd; color: #888; font-size: 0.85rem; }
-        input[type=range] { width: 120px; vertical-align: middle; cursor: pointer; accent-color: var(--main-color); }
-
-        /* 결과창 */
-        #result-section h2 { color: #e3350d; font-size: 2.2rem; margin: 10px 0; }
-        #pokemon-name { color: var(--main-color); font-size: 2.5rem; margin: 15px 0; }
-        .retry-btn { margin-top: 30px; background: var(--main-color); color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        :root {
+            --main-color: #3b4cca;
+            --accent-color: #ffcc00;
+            --danger-color: #e3350d;
+        }
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: #f7f9fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        #quiz-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #eee;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 10px;
+            background-color: var(--main-color);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+        h1 {
+            color: var(--main-color);
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+        .question-box {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .answer-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+        .answer-btn:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            font-weight: bold;
+            transform: translateY(-2px);
+        }
+        .hidden {
+            display: none;
+        }
+        .volume-control {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed #ddd;
+            color: #888;
+            font-size: 0.85rem;
+        }
+        input[type=range] {
+            width: 120px;
+            vertical-align: middle;
+            cursor: pointer;
+            accent-color: var(--main-color);
+        }
+        #result-section h2 {
+            color: var(--danger-color);
+            font-size: 2.2rem;
+            margin: 10px 0;
+        }
+        #pokemon-name {
+            color: var(--main-color);
+            font-size: 2.5rem;
+            margin: 15px 0;
+        }
+        .retry-btn {
+            margin-top: 30px;
+            background: var(--main-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #status-text {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        #status-text.extra {
+            color: var(--danger-color);
+        }
     </style>
 </head>
 <body>
@@ -45,8 +133,10 @@
     </div>
 
     <div id="quiz-section" class="hidden">
-        <div class="progress-container"><div id="progress-bar"></div></div>
-        <div id="status-text" style="font-size: 0.9rem; color: #666; margin-bottom: 5px;"></div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="status-text"></div>
         <div class="question-box" id="question-text"></div>
         <div id="answer-buttons"></div>
     </div>
@@ -65,24 +155,34 @@
 </div>
 
 <script>
-    var tag = document.createElement('script');
+    // YouTube API 로드
+    const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
-    var firstScriptTag = document.getElementsByTagName('script')[0];
+    const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    var player;
+    let player;
     const VIDEO_ID = 'ehI75lWfXhw';
 
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
-            height: '0', width: '0', videoId: VIDEO_ID,
-            playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': VIDEO_ID },
-            events: { 'onReady': onPlayerReady }
+            height: '0',
+            width: '0',
+            videoId: VIDEO_ID,
+            playerVars: {
+                'autoplay': 0,
+                'controls': 0,
+                'loop': 1,
+                'playlist': VIDEO_ID
+            },
+            events: {
+                'onReady': onPlayerReady
+            }
         });
     }
 
     function onPlayerReady(event) {
-        event.target.setVolume(30); // 초기 볼륨 30% 설정
+        event.target.setVolume(30);
     }
 
     function changeVolume(val) {
@@ -91,8 +191,8 @@
         }
     }
 
-    // 질문 및 포켓몬 데이터 (동일)
-    const allQuestions = [
+    // 질문 데이터
+    const ALL_QUESTIONS = [
         { q: "비밀을 무심코 누설해버린 적이 있는가?", a: [{t: "있다", s: {Rash: 4, Lonely: 4}}, {t: "없다", s: {Hardy: 2}}] },
         { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "절반은 쓰고 절반은 모은다", s: {Calm: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
         { q: "매일 복근 운동 10회. 계속할 수 있을까?", a: [{t: "이 정도는 누워서 떡 먹기다", s: {Impish: 4, Sassy: 2}}, {t: "열심히 해 본다", s: {Hardy: 4}}, {t: "처음부터 할 생각이 없다", s: {Quirky: 4}}] },
@@ -159,67 +259,95 @@
         { q: "길에서 좋은 냄새가 난다!", a: [{t: "상상한다", s: {Docile: 4}}, {t: "냄새를 따라간다", s: {Naive: 4, Rash: 2}}, {t: "배가 고파진다", s: {Impish: 4}}] }
     ];
 
-    const pokemonData = {
+    const POKEMON_DATA = {
         male: { Hardy: "아차모", Docile: "파이리", Brave: "피카츄", Jolly: "리아코", Impish: "팽도리", Naive: "불꽃숭이", Bold: "모부기", Timid: "브케인", Hasty: "에나비", Sassy: "냐옹", Quiet: "나무지기", Relaxed: "먹고자", Rash: "물짱이", Quirky: "꼬부기", Lonely: "이상해씨", Calm: "치코리타" },
         female: { Hardy: "나무지기", Docile: "이상해씨", Brave: "파이리", Jolly: "먹고자", Impish: "불꽃숭이", Naive: "에나비", Bold: "꼬부기", Timid: "모부기", Hasty: "피카츄", Sassy: "리아코", Quiet: "치코리타", Relaxed: "식스테일", Rash: "아차모", Quirky: "팽도리", Lonely: "물짱이", Calm: "브케인" }
     };
 
-    const koreanTypeMap = { Hardy: "강건한", Docile: "온순한", Brave: "용감한", Jolly: "유쾌한", Impish: "장난꾸러기", Naive: "순진한", Bold: "과감한", Timid: "소심한", Hasty: "조급한", Sassy: "건방진", Quiet: "내성적", Relaxed: "느긋한", Rash: "무모한", Quirky: "변덕스러운", Lonely: "고독한", Calm: "차분한" };
+    const KOREAN_TYPE_MAP = { Hardy: "강건한", Docile: "온순한", Brave: "용감한", Jolly: "유쾌한", Impish: "장난꾸러기", Naive: "순진한", Bold: "과감한", Timid: "소심한", Hasty: "조급한", Sassy: "건방진", Quiet: "내성적", Relaxed: "느긋한", Rash: "무모한", Quirky: "변덕스러운", Lonely: "고독한", Calm: "차분한" };
 
-    let userGender = '', selectedQuestions = [], currentIdx = 0, scores = {};
+    let userGender = '';
+    let selectedQuestions = [];
+    let currentIdx = 0;
+    let scores = {};
 
     function startQuiz(gender) {
         userGender = gender;
-        if (player && typeof player.playVideo === 'function') player.playVideo();
+        if (player && typeof player.playVideo === 'function') {
+            player.playVideo();
+        }
         document.getElementById("gender-section").classList.add("hidden");
         document.getElementById("quiz-section").classList.remove("hidden");
-        Object.keys(koreanTypeMap).forEach(type => scores[type] = 0);
-        selectedQuestions = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 21);
-        render();
+        
+        Object.keys(KOREAN_TYPE_MAP).forEach(type => scores[type] = 0);
+        selectedQuestions = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 21);
+        renderQuestion();
     }
 
-    function render() {
-        if (currentIdx >= selectedQuestions.length) { showResult(); return; }
+    function renderQuestion() {
+        if (currentIdx >= selectedQuestions.length) {
+            showResult();
+            return;
+        }
+
         const q = selectedQuestions[currentIdx];
         const isExtra = currentIdx >= 20;
         const progress = isExtra ? 100 : (currentIdx / 20) * 100;
+        
         document.getElementById("progress-bar").style.width = `${progress}%`;
+        
         const statusText = document.getElementById("status-text");
-        statusText.innerText = isExtra ? `[동점 발생] 판별 질문` : `질문 ${currentIdx + 1} / 20`;
-        statusText.style.color = isExtra ? "#e3350d" : "#666";
+        if (isExtra) {
+            statusText.innerText = '[동점 발생] 판별 질문';
+            statusText.className = 'extra';
+        } else {
+            statusText.innerText = `질문 ${currentIdx + 1} / 20`;
+            statusText.className = '';
+        }
+        
         document.getElementById("question-text").innerText = q.q;
+        
         const btnArea = document.getElementById("answer-buttons");
         btnArea.innerHTML = "";
+        
         q.a.forEach(ans => {
             const btn = document.createElement("button");
             btn.className = "answer-btn";
             btn.innerText = ans.t;
-            btn.onclick = () => {
-                for (let type in ans.s) scores[type] += ans.s[type];
-                currentIdx++;
-                checkNext();
-            };
+            btn.onclick = () => handleAnswer(ans.s);
             btnArea.appendChild(btn);
         });
+    }
+
+    function handleAnswer(scoreData) {
+        for (let type in scoreData) {
+            scores[type] += scoreData[type];
+        }
+        currentIdx++;
+        checkNext();
     }
 
     function checkNext() {
         if (currentIdx === 20) {
             const maxVal = Math.max(...Object.values(scores));
             const winners = Object.keys(scores).filter(t => scores[t] === maxVal);
-            if (winners.length > 1) render();
-            else showResult();
+            if (winners.length > 1) {
+                renderQuestion();
+            } else {
+                showResult();
+            }
         } else {
-            render();
+            renderQuestion();
         }
     }
 
     function showResult() {
         document.getElementById("quiz-section").classList.add("hidden");
         document.getElementById("result-section").classList.remove("hidden");
+        
         const topType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
-        document.getElementById("personality-type").innerText = koreanTypeMap[topType] + " 성격";
-        document.getElementById("pokemon-name").innerText = pokemonData[userGender][topType] || "신비한 포켓몬";
+        document.getElementById("personality-type").innerText = KOREAN_TYPE_MAP[topType] + " 성격";
+        document.getElementById("pokemon-name").innerText = POKEMON_DATA[userGender][topType] || "신비한 포켓몬";
     }
 </script>
 
