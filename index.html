@@ -3,165 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>포켓몬 성격 테스트 | PMD Original Intro</title>
+    <title>포켓몬 성격 테스트 | PMD Master</title>
     <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-neutral: #000000; /* 인트로는 완전 블랙 */
             --window-bg: #1a202c;
             --border-green: #38f838;
             --text-white: #ffffff;
+            --bg-neutral: #f4f4f5;
+            --bg-dot: #d1d5db;
         }
 
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; font-smooth: never; -webkit-font-smoothing: none; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         
         body {
             font-family: 'DungGeunMo', monospace;
             margin: 0; padding: 0;
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh;
-            background-color: #000; /* 기본 배경 블랙 */
-            color: var(--text-white);
+            background-color: var(--bg-neutral);
+            background-image: radial-gradient(var(--bg-dot) 1px, transparent 1px);
+            background-size: 20px 20px;
             overflow: hidden;
+            transition: background-color 0.5s;
         }
 
         #game-container {
-            width: 100%;
-            max-width: 500px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            position: relative;
+            width: 95%; max-width: 500px;
+            display: flex; flex-direction: column; gap: 15px;
+            z-index: 10;
         }
 
-        /* 대화창 스타일 */
+        /* 윈도우 공통 스타일 */
         .window {
             background: var(--window-bg);
             border: 4px solid var(--border-green);
-            border-radius: 4px;
-            box-shadow: 0 8px 0 rgba(0,0,0,0.5), inset 0 0 0 2px #000;
+            border-radius: 8px;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.1), inset 0 0 0 2px #000;
             color: var(--text-white);
-            padding: 25px;
-            width: 100%;
-            min-height: 160px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            cursor: pointer;
+            padding: 20px;
         }
 
-        /* 인트로 전용 (배경 없는 텍스트) */
-        #intro-display {
-            font-size: 1.4rem;
-            line-height: 1.8;
-            word-break: keep-all;
-            text-align: center;
-            max-width: 80%;
-            cursor: pointer;
+        /* 인트로 전용 스타일 */
+        #intro-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 100; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 20px;
+        }
+        #intro-text {
+            font-size: 1.4rem; line-height: 1.8; text-align: center;
+            word-break: keep-all; color: #fff; max-width: 80%;
+        }
+        .next-btn {
+            position: fixed; bottom: 50px; width: 80%; max-width: 300px;
+            background: #fff; color: #000; border: 4px solid var(--border-green);
+            padding: 20px; font-family: inherit; font-size: 1.2rem; cursor: pointer;
+            text-align: center; border-radius: 10px;
         }
 
-        /* 다음으로 넘어가기 화살표 */
-        .next-arrow {
-            position: absolute;
-            bottom: 15px;
-            width: 0; height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 12px solid #fff;
-            animation: bounce 0.8s infinite;
-        }
-
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
-
-        /* 상태바 */
-        #ui-header { width: 100%; max-width: 450px; position: absolute; top: 30px; }
-        .status-bar { display: flex; justify-content: space-between; font-size: 14px; color: #aaa; margin-bottom: 5px; }
-        .progress-bar { height: 4px; background: #333; }
+        /* 게임 UI */
+        .status-bar { display: flex; justify-content: space-between; color: #4b5563; font-size: 14px; margin-bottom: 5px; }
+        .progress-bar { height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
         #progress-fill { height: 100%; background: var(--border-green); width: 0%; transition: width 0.3s; }
 
-        /* 답변 버튼 */
-        #answer-box { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 20px; }
-        .btn {
-            background: var(--window-bg);
-            border: 2px solid var(--border-green);
-            color: #fff;
-            padding: 15px;
-            font-family: inherit;
-            font-size: 1.1rem;
-            text-align: left;
-            padding-left: 40px;
-            position: relative;
-            cursor: pointer;
+        #question-box {
+            min-height: 140px; font-size: 1.2rem; line-height: 1.6;
+            display: flex; align-items: center; justify-content: center; text-align: center;
         }
-        .btn:hover::before { content: '▶'; position: absolute; left: 15px; }
+        #answer-box { display: flex; flex-direction: column; gap: 8px; }
 
-        /* 전체 화면 파동 감지 레이어 */
+        .btn {
+            background: transparent; border: 1px solid transparent; color: var(--text-white);
+            font-family: inherit; font-size: 1.1rem; text-align: left;
+            padding: 12px 12px 12px 35px; cursor: pointer; position: relative;
+        }
+        .btn:hover { background: rgba(255,255,255,0.1); border-color: var(--border-green); }
+        .btn:hover::before { content: '▶'; position: absolute; left: 12px; }
+
+        /* 오라 감지 */
         #aura-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(56, 248, 56, 0.2) 0%, #000 70%);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 100; cursor: pointer;
-            animation: pulseBg 3s infinite;
+            background: radial-gradient(circle, rgba(56, 248, 56, 0.4) 0%, #000 80%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 200; cursor: pointer; text-align: center; color: #fff;
         }
-        @keyframes pulseBg { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 
-        .controls { position: absolute; bottom: 20px; font-size: 12px; opacity: 0.5; }
-        input[type=range] { accent-color: var(--border-green); }
+        .result-layout { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
+        #pokemon-img { width: 160px; height: 160px; margin: 15px 0; object-fit: contain; }
 
-        .result-layout img { width: 180px; image-rendering: pixelated; margin: 15px 0; }
         .hidden { display: none !important; }
+        #player { position: fixed; bottom: 0; right: 0; width: 1px; height: 1px; opacity: 0; }
+        .controls { text-align: center; margin-top: 15px; color: #94a3b8; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div id="player" style="position: absolute; left: -9999px;"></div>
+<div id="player"></div>
 
-<div id="game-container">
-    <!-- 인트로 화면 -->
-    <div id="intro-screen" onclick="handleIntroClick()">
-        <div id="intro-display"></div>
-        <div id="intro-arrow" class="next-arrow hidden"></div>
-    </div>
+<!-- 인트로 레이어 -->
+<div id="intro-layer">
+    <div id="intro-text">...</div>
+    <button class="next-btn" id="intro-next-btn" onclick="nextIntro()">다음 (Next)</button>
+</div>
 
-    <!-- 메인 테스트 화면 -->
-    <div id="test-screen" class="hidden">
-        <div id="ui-header">
-            <div class="status-bar"><span id="step-name">성격 진단</span><span id="step-count">0 / 20</span></div>
-            <div class="progress-bar"><div id="progress-fill"></div></div>
+<!-- 메인 게임 레이어 -->
+<div id="game-container" class="hidden">
+    <div id="ui-header">
+        <div class="status-bar">
+            <span id="step-name">성격 진단</span>
+            <span id="step-count">0 / 20</span>
         </div>
-        <div id="question-box" class="window">
-            <div id="text-display"></div>
-        </div>
-        <div id="answer-box"></div>
+        <div class="progress-bar"><div id="progress-fill"></div></div>
     </div>
+    <div id="question-box" class="window">
+        <div id="text-display"></div>
+    </div>
+    <div id="answer-box" class="window"></div>
+    <div class="controls">BGM 🔈 <input type="range" id="volume-slider" min="0" max="100" value="30"> 🔊</div>
+</div>
 
-    <!-- 파동 감지 화면 (전체 터치) -->
-    <div id="aura-layer" class="hidden">
-        <div style="text-align: center;">
-            <p style="font-size: 1.2rem;">화면의 아무 곳이나<br>잠시 동안 누르고 있어 주게...</p>
-            <div style="width: 60px; height: 60px; border: 2px solid #38f838; border-radius: 50%; margin: 20px auto; animation: auraPulse 1s infinite;"></div>
-        </div>
-    </div>
-
-    <div class="controls">
-        BGM <input type="range" id="volume-slider" min="0" max="100" value="30">
-    </div>
+<!-- 오라 감지 레이어 -->
+<div id="aura-layer" class="hidden">
+    <p style="font-size: 1.3rem;">모든 질문이 끝났습니다...<br>화면 아무 곳이나 길게 눌러<br>당신의 파동을 전달해 주세요.</p>
+    <div style="width: 80px; height: 80px; border: 3px solid #38f838; border-radius: 50%; margin-top: 20px; animation: breathe 1.5s infinite;"></div>
 </div>
 
 <script>
-    // --- 인트로 대사 (이미지 기반 고증) ---
+    // --- 데이터 ---
     const INTRO_TEXTS = [
         "어서 오너라!",
         "여기는 포켓몬들의 세계로\n통하는 입구다!",
         "이 문 너머에는 네가 상상하지 못한\n다양한 모험이 기다리고 있을 것이다!",
-        "하지만 모험에 나서기 전에\n너에게 몇 가지 질문이 있다",
-        "솔직하게 대답해 주길 바란다",
+        "하지만 모험에 나서기 전에\n너에게 몇 가지 질문이 있다.",
+        "솔직하게 대답해 주길 바란다.",
         "준비는 되었는가?",
         "그럼... 질문 시작하겠다!"
     ];
@@ -234,11 +208,11 @@
         { q: "길에서 좋은 냄새가 난다!", a: [{t: "상상한다", s: {Docile: 4}}, {t: "냄새를 따라간다", s: {Naive: 4, Rash: 2}}, {t: "배가 고파진다", s: {Impish: 4}}] }
     ];
 
-    const AURA_COLORS = { Hardy: "블루", Docile: "화이트", Brave: "레드", Jolly: "옐로", Impish: "그린", Naive: "오렌지", Bold: "골드", Timid: "라이트그린", Hasty: "스카이블루", Sassy: "아쿠아", Quiet: "퍼플", Relaxed: "브라운", Rash: "그레이", Quirky: "실버", Lonely: "핑크", Calm: "블랙" };
     const KOREAN_TYPE_MAP = { Hardy: "노력하는", Docile: "온순한", Brave: "용감한", Jolly: "명랑한", Impish: "장난꾸러기", Naive: "천진난만한", Bold: "대담한", Timid: "겁쟁이", Hasty: "성급한", Sassy: "건방진", Quiet: "냉정한", Relaxed: "무사태평", Rash: "덜렁거리는", Quirky: "변덕스러운", Lonely: "외로움타는", Calm: "차분한" };
     const POKEMON_MAP = { male: { Hardy: "아차모", Docile: "파이리", Brave: "피카츄", Jolly: "리아코", Impish: "팽도리", Naive: "불꽃숭이", Bold: "모부기", Timid: "브케인", Hasty: "에나비", Sassy: "냐옹", Quiet: "나무지기", Relaxed: "먹고자", Rash: "물짱이", Quirky: "꼬부기", Lonely: "이상해씨", Calm: "치코리타" }, female: { Hardy: "나무지기", Docile: "이상해씨", Brave: "파이리", Jolly: "먹고자", Impish: "불꽃숭이", Naive: "에나비", Bold: "꼬부기", Timid: "모부기", Hasty: "피카츄", Sassy: "리아코", Quiet: "치코리타", Relaxed: "식스테일", Rash: "아차모", Quirky: "팽도리", Lonely: "물짱이", Calm: "브케인" } };
     const ID_MAP = { "아차모": 255, "파이리": 4, "피카츄": 25, "리아코": 158, "팽도리": 393, "불꽃숭이": 390, "모부기": 387, "브케인": 155, "에나비": 300, "냐옹": 52, "나무지기": 252, "먹고자": 446, "물짱이": 258, "꼬부기": 7, "이상해씨": 1, "치코리타": 152, "식스테일": 37 };
 
+    // --- 제어 변수 ---
     let introIdx = 0;
     let isTyping = false;
     let currentIdx = 0;
@@ -246,50 +220,52 @@
     let testPool = [];
     let userGender = '';
 
-    // --- 유튜브 API 설정 ---
-    let player;
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-            videoId: 'ehI75lWfXhw',
-            playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'playsinline': 1 },
-            events: { 'onReady': (e) => { e.target.setVolume(document.getElementById('volume-slider').value); } }
-        });
-    }
-    const tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
-
-    // --- 타이핑 효과 ---
+    // --- 타이핑 함수 ---
     function typeWriter(text, elementId, callback) {
         let i = 0; isTyping = true;
         const el = document.getElementById(elementId);
         el.innerText = "";
-        document.getElementById("intro-arrow").classList.add("hidden");
         const timer = setInterval(() => {
             if (i < text.length) { el.append(text.charAt(i)); i++; }
-            else { 
-                clearInterval(timer); isTyping = false; 
-                if (elementId === "intro-display") document.getElementById("intro-arrow").classList.remove("hidden");
-                if (callback) callback(); 
-            }
-        }, 60);
+            else { clearInterval(timer); isTyping = false; if (callback) callback(); }
+        }, 50);
     }
 
     // --- 인트로 제어 ---
-    function handleIntroClick() {
+    function nextIntro() {
         if (isTyping) return;
-        if (player && introIdx === 0) { player.playVideo(); player.unMute(); }
-        
+        if (introIdx === 0 && player && player.playVideo) { player.playVideo(); player.unMute(); }
+
         if (introIdx < INTRO_TEXTS.length) {
-            typeWriter(INTRO_TEXTS[introIdx], "intro-display");
+            typeWriter(INTRO_TEXTS[introIdx], "intro-text");
             introIdx++;
         } else {
-            startTestSession();
+            // 인트로 끝 -> 성별 선택으로
+            document.getElementById("intro-layer").classList.add("hidden");
+            document.getElementById("game-container").classList.remove("hidden");
+            askGender();
         }
     }
 
-    function startTestSession() {
-        document.getElementById("intro-screen").classList.add("hidden");
-        document.getElementById("test-screen").classList.remove("hidden");
+    function askGender() {
+        document.getElementById("step-name").innerText = "마지막 준비";
+        document.getElementById("answer-box").innerHTML = "";
+        typeWriter("당신은 남자 아이인가요? 여자 아이인가요?", "text-display", () => {
+            const ansBox = document.getElementById("answer-box");
+            ansBox.innerHTML = `
+                <button class="btn" onclick="setGender('male')">▶ 남자 아이</button>
+                <button class="btn" onclick="setGender('female')">▶ 여자 아이</button>
+            `;
+        });
+    }
+
+    function setGender(gender) {
+        userGender = gender;
+        startTest();
+    }
+
+    function startTest() {
+        document.getElementById("step-name").innerText = "성격 진단";
         Object.keys(KOREAN_TYPE_MAP).forEach(k => scores[k] = 0);
         testPool = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 20);
         render();
@@ -297,7 +273,7 @@
 
     function render() {
         if (currentIdx >= testPool.length) {
-            askGender();
+            startAuraScan();
             return;
         }
         const data = testPool[currentIdx];
@@ -318,69 +294,53 @@
         });
     }
 
-    function askGender() {
-        document.getElementById("step-name").innerText = "마지막 확인";
-        document.getElementById("answer-box").innerHTML = "";
-        typeWriter("질문은 이것으로 끝이다. 마지막으로 하나만 더 알려다오. 당신은 남자 아이인가? 여자 아이인가?", "text-display", () => {
-            const ansBox = document.getElementById("answer-box");
-            ansBox.innerHTML = `
-                <button class="btn" onclick="setGender('male')">▶ 남자 아이</button>
-                <button class="btn" onclick="setGender('female')">▶ 여자 아이</button>
-            `;
-        });
-    }
-
-    function setGender(gender) {
-        userGender = gender;
-        startAuraScan();
-    }
-
     function startAuraScan() {
-        document.getElementById("test-screen").classList.add("hidden");
+        document.getElementById("game-container").classList.add("hidden");
         const aura = document.getElementById("aura-layer");
         aura.classList.remove("hidden");
         
-        const finishScan = () => {
+        const complete = () => {
             aura.onclick = null;
             aura.ontouchstart = null;
+            aura.classList.add("hidden");
+            document.getElementById("game-container").classList.remove("hidden");
             showResult();
         };
 
         aura.onmousedown = aura.ontouchstart = () => {
-            setTimeout(finishScan, 2500);
+            setTimeout(complete, 2500);
         };
     }
 
     function showResult() {
-        document.getElementById("aura-layer").classList.add("hidden");
-        document.getElementById("test-screen").classList.remove("hidden");
         document.getElementById("ui-header").classList.add("hidden");
-        
         const maxScore = Math.max(...Object.values(scores));
         const winners = Object.keys(scores).filter(k => scores[k] === maxScore);
         const topKey = winners[Math.floor(Math.random() * winners.length)];
         
-        typeWriter(`파동 감지가 완료되었다. 당신의 오라색은 [${AURA_COLORS[topKey]}]! 이 색은 [${KOREAN_TYPE_MAP[topKey]}] 성격을 의미한다.`, "text-display", () => {
+        typeWriter(`진단이 완료되었습니다... 당신의 성격은 [${KOREAN_TYPE_MAP[topKey]}]!`, "text-display", () => {
             setTimeout(() => {
                 const name = POKEMON_MAP[userGender][topKey];
                 const pokeId = ID_MAP[name];
                 document.getElementById("question-box").innerHTML = `
-                    <div class="result-layout" style="text-align: center;">
-                        <p>당신은 바로... <strong>${name}</strong>이다!</p>
-                        <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png" style="width:180px; image-rendering:pixelated;">
-                        <p style="font-size:14px; color:#48bb78; margin-top:10px;">자, 눈을 뜨면 당신의 모험이 시작될 것이다!</p>
-                        <button class="btn" style="color:#fff; border-color:#fff; margin-top:15px; width:100%; text-align:center; padding-left:0;" onclick="location.reload()">▶ 다시 하기</button>
+                    <div class="result-layout">
+                        <p>당신은 바로... <strong>${name}</strong>입니다!</p>
+                        <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png">
+                        <button class="btn" style="color:#fff; border-color:#fff; margin-top:10px; text-align:center; padding-left:0;" onclick="location.reload()">▶ 다시 하기</button>
                     </div>`;
+                document.getElementById("answer-box").innerHTML = "";
             }, 2000);
         });
     }
 
+    // --- 유튜브 API ---
+    var player;
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', { videoId: 'ehI75lWfXhw', playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'controls': 0, 'playsinline': 1 } });
+    }
     document.getElementById('volume-slider').oninput = (e) => { if(player) player.setVolume(e.target.value); };
 
-    // 최초 실행
-    window.onload = () => {
-        typeWriter("... (화면을 클릭하여 시작하세요)", "intro-display");
-    };
+    window.onload = () => typeWriter("... (아래 버튼을 눌러 시작하세요)", "intro-text");
 </script>
 </body>
 </html>
