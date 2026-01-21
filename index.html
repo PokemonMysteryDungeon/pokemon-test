@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>포켓몬 성격 테스트 - 편안한 버전</title>
+    <title>포켓몬 성격 테스트 - 마스터 버전</title>
     <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* 눈이 편한 색상 조합 */
-            --window-bg: rgba(12, 26, 43, 0.95); /* 깊은 남색 (약간 투명) */
-            --border-green: #4ade80;            /* 차분한 에메랄드 그린 */
-            --text-white: #f8f9fa;               /* 미색 (순백색보다 눈이 편함) */
-            --bg-soft-pink: #fdf2f8;            /* 매우 연한 분홍색 */
-            --bg-wave-pink: #fbcfe8;            /* 부드러운 분홍색 */
+            --window-bg: #1a202c;       /* 짙은 네이비 그레이 */
+            --border-green: #48bb78;    /* 안정적인 초록색 */
+            --text-white: #edf2f7;      /* 가독성 좋은 밝은 회색 */
+            --bg-neutral: #f2f2f2;      /* 무채색 배경 */
+            --bg-dot: #e2e8f0;          /* 배경 도트 무늬 */
         }
 
         body {
@@ -20,19 +19,10 @@
             margin: 0; padding: 0;
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh;
-            /* 배경: 움직임을 아주 느리게 하고 대비를 낮춤 */
-            background: linear-gradient(135deg, var(--bg-soft-pink) 25%, transparent 25%) -50px 0,
-                        linear-gradient(225deg, var(--bg-soft-pink) 25%, transparent 25%) -50px 0,
-                        linear-gradient(315deg, var(--bg-soft-pink) 25%, transparent 25%),
-                        linear-gradient(45deg, var(--bg-soft-pink) 25%, transparent 25%);
-            background-size: 100px 100px;
-            background-color: var(--bg-wave-pink);
-            animation: slowMove 60s linear infinite; /* 매우 느린 움직임 */
-        }
-
-        @keyframes slowMove {
-            from { background-position: 0 0; }
-            to { background-position: 500px 500px; }
+            /* 눈이 편한 무채색 도트 배경 */
+            background-color: var(--bg-neutral);
+            background-image: radial-gradient(var(--bg-dot) 1px, transparent 1px);
+            background-size: 20px 20px;
         }
 
         #game-container {
@@ -40,79 +30,70 @@
             max-width: 550px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            position: relative;
-            z-index: 10;
+            gap: 12px;
         }
 
-        /* 공통 윈도우 스타일 */
         .window {
             background: var(--window-bg);
             border: 4px solid var(--border-green);
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3), inset 0 0 0 2px #000;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 0 0 2px #000;
             color: var(--text-white);
             padding: 20px;
             box-sizing: border-box;
         }
 
-        /* 질문 영역 */
         #question-box {
-            min-height: 100px;
-            font-size: 1.25rem;
+            min-height: 110px;
+            font-size: 1.2rem;
             line-height: 1.6;
             word-break: keep-all;
-            display: flex;
-            align-items: center;
         }
 
-        /* 선택지 영역 */
         #answer-box {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
-        /* 버튼 스타일 */
         .btn {
             background: transparent;
-            border: 2px solid transparent;
+            border: 1px solid transparent;
             color: var(--text-white);
             font-family: 'DungGeunMo', monospace;
             font-size: 1.1rem;
             text-align: left;
-            padding: 12px 15px 12px 35px;
+            padding: 10px 10px 10px 30px;
             cursor: pointer;
-            border-radius: 8px;
             position: relative;
-            transition: all 0.2s;
+            transition: background 0.2s;
         }
 
         .btn:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.05);
             border-color: var(--border-green);
         }
 
         .btn:hover::before {
             content: '▶';
             position: absolute;
-            left: 12px;
+            left: 10px;
             color: var(--border-green);
         }
 
-        /* 진행도 표시 */
-        .progress-text {
-            color: var(--window-bg);
-            font-size: 0.9rem;
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 5px;
-            text-align: right;
             font-weight: bold;
+            color: #4a5568;
         }
 
         .progress-bar {
-            height: 8px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 4px;
+            height: 6px;
+            background: #cbd5e0;
+            border-radius: 3px;
             overflow: hidden;
             margin-bottom: 10px;
         }
@@ -120,26 +101,11 @@
             height: 100%;
             background: var(--border-green);
             width: 0%;
-            transition: width 0.4s ease;
+            transition: width 0.3s ease;
         }
 
-        /* 결과 화면 */
-        .result-layout {
-            text-align: center;
-            animation: fadeIn 0.8s ease;
-        }
-        #pokemon-img {
-            width: 150px;
-            height: 150px;
-            margin: 15px 0;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        .result-layout { text-align: center; }
+        #pokemon-img { width: 140px; margin: 15px 0; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -148,42 +114,66 @@
 <div id="player" style="position: absolute; left: -9999px;"></div>
 
 <div id="game-container">
-    <div id="ui-header">
-        <div class="progress-text" id="status-text">준비 중...</div>
+    <div id="header">
+        <div class="progress-info">
+            <span id="step-label">성격 테스트</span>
+            <span id="progress-text">0 / 20</span>
+        </div>
         <div class="progress-bar"><div id="progress-fill"></div></div>
     </div>
 
-    <!-- 메인 질문창 -->
     <div id="question-box" class="window">
-        <div id="text-display">탐험을 떠나기 전... 당신의 성별은 무엇인가요?</div>
+        <div id="text-display">탐험을 시작하기 전... 당신의 성별을 선택해 주세요.</div>
     </div>
 
-    <!-- 선택지창 -->
     <div id="answer-box" class="window">
         <!-- 버튼 동적 생성 -->
     </div>
 </div>
 
 <script>
-    // 질문 데이터
-    const QUESTIONS = [
-        { q: "휴일인데 아무도 놀아 주지 않는다... 그럼 당신은?", a: [{t: "여행을 떠난다", s: {Jolly: 4}}, {t: "멍하게 있는다", s: {Relaxed: 4}}, {t: "방구석에 박혀있는다", s: {Lonely: 4}}] },
+    // 전체 질문 풀 (충분한 데이터 확보)
+    const ALL_QUESTIONS = [
+        { q: "휴일인데 아무도 놀아 주지 않는다... 그럼 당신은?", a: [{t: "여행을 떠난다", s: {Jolly: 4}}, {t: "멍하게 있는다", s: {Relaxed: 4}}, {t: "집에 박혀있는다", s: {Lonely: 4}}] },
         { q: "비밀을 무심코 누설해버린 적이 있는가?", a: [{t: "있다", s: {Rash: 4}}, {t: "없다", s: {Hardy: 4}}] },
-        { q: "모르는 것은 모른다고 솔직하게 말할 수 있는가?", a: [{t: "말할 수 있다", s: {Docile: 4}}, {t: "잘 말하지 못한다", s: {Timid: 4}}] },
-        { q: "매일 복근 운동 10회. 계속할 수 있을까?", a: [{t: "당연하다", s: {Hardy: 4}}, {t: "하다 말 것이다", s: {Quirky: 4}}] },
-        { q: "기쁜 일이 있으면 무심코 춤을 추는가?", a: [{t: "예", s: {Jolly: 4}}, {t: "아니오", s: {Quiet: 4}}] }
+        { q: "모르는 것은 모른다고 솔직하게 말하는 편인가?", a: [{t: "말한다", s: {Docile: 4}}, {t: "말 못한다", s: {Timid: 4}}] },
+        { q: "복근 운동 매일 10개! 계속할 수 있을까?", a: [{t: "쉽지", s: {Hardy: 4}}, {t: "내일부터...", s: {Quirky: 4}}] },
+        { q: "기쁜 일이 있으면 무심코 춤을 추는가?", a: [{t: "예", s: {Jolly: 4}}, {t: "아니오", s: {Quiet: 4}}] },
+        { q: "자주 다치는 타입인가?", a: [{t: "그렇다", s: {Rash: 4}}, {t: "전혀", s: {Calm: 4}}] },
+        { q: "누가 부른 것 같은데 아무도 없다. 당신의 생각은?", a: [{t: "귀신인가?", s: {Timid: 4}}, {t: "기분 탓이지", s: {Relaxed: 4}}] },
+        { q: "TV 채널을 자주 바꾸는 편인가?", a: [{t: "그렇다", s: {Hasty: 4}}, {t: "아니오", s: {Calm: 4}}] },
+        { q: "도시와 시골 중 어느 쪽이 좋은가?", a: [{t: "도시", s: {Sassy: 4}}, {t: "시골", s: {Calm: 4}}] },
+        { q: "내일은 중요한 시험이다!", a: [{t: "밤새 공부한다", s: {Hardy: 4}}, {t: "어떻게든 되겠지", s: {Relaxed: 4}}] },
+        { q: "거짓말도 필요할 때가 있다고 생각하나?", a: [{t: "그렇다", s: {Quiet: 4}}, {t: "아니오", s: {Brave: 4}}] },
+        { q: "주목받는 것을 좋아하는가?", a: [{t: "좋다", s: {Sassy: 4}}, {t: "부끄럽다", s: {Lonely: 4}}] },
+        { q: "계획대로 행동하는 편인가?", a: [{t: "예", s: {Hardy: 4}}, {t: "아니오", s: {Quirky: 4}}] },
+        { q: "셔츠를 뒤집어 입었다는 소리를 들으면?", a: [{t: "당황한다", s: {Docile: 4}}, {t: "크게 웃는다", s: {Rash: 4}}] },
+        { q: "이기기 위해서라면 수단과 방법을 가리지 않나?", a: [{t: "그렇다", s: {Quiet: 4}}, {t: "아니오", s: {Brave: 4}}] },
+        { q: "둥근 공을 보면 무심코...", a: [{t: "차고 싶다", s: {Hasty: 4}}, {t: "던지고 싶다", s: {Impish: 4}}] },
+        { q: "약속 시간에 늦는 경우가 많은가?", a: [{t: "그렇다", s: {Rash: 4}}, {t: "전혀", s: {Hardy: 4}}] },
+        { q: "남은 만두 하나를 친구가 먹어버렸다!", a: [{t: "괜찮다", s: {Calm: 4}}, {t: "화난다", s: {Jolly: 4}}] },
+        { q: "자신이 혹시 천재라고 생각한 적이 있나?", a: [{t: "있다", s: {Sassy: 4}}, {t: "전혀", s: {Hardy: 4}}] },
+        { q: "지하실에서 비밀 계단을 발견했다!", a: [{t: "내려간다", s: {Brave: 4}}, {t: "무서워서 도망친다", s: {Timid: 4}}] },
+        { q: "하루 지난 케이크가 냉장고에 있다!", a: [{t: "먹는다", s: {Brave: 4}}, {t: "버린다", s: {Quiet: 4}}] },
+        { q: "유령선 안에 무엇이 있을 것 같나?", a: [{t: "보물!", s: {Jolly: 4}}, {t: "귀신...", s: {Timid: 4}}] },
+        { q: "주위가 시끄러워도 신경 쓰지 않나?", a: [{t: "그렇다", s: {Relaxed: 4}}, {t: "아니오", s: {Lonely: 4}}] },
+        { q: "용돈 관리는 어떻게 하나?", a: [{t: "철저히", s: {Hardy: 4}}, {t: "막 쓴다", s: {Quirky: 4}}] }
     ];
 
     const POKEMON_MAP = {
-        male: { Hardy: "아차모", Docile: "파이리", Jolly: "리아코", Relaxed: "먹고자", Rash: "물짱이", Lonely: "이상해씨", Timid: "브케인", Quirky: "꼬부기", Quiet: "나무지기" },
-        female: { Hardy: "나무지기", Docile: "이상해씨", Jolly: "먹고자", Relaxed: "식스테일", Rash: "아차모", Lonely: "물짱이", Timid: "모부기", Quirky: "팽도리", Quiet: "치코리타" }
+        male: { Hardy: "아차모", Docile: "파이리", Brave: "피카츄", Jolly: "리아코", Impish: "팽도리", Naive: "불꽃숭이", Bold: "모부기", Timid: "브케인", Hasty: "에나비", Sassy: "냐옹", Quiet: "나무지기", Relaxed: "먹고자", Rash: "물짱이", Quirky: "꼬부기", Lonely: "이상해씨", Calm: "치코리타" },
+        female: { Hardy: "나무지기", Docile: "이상해씨", Brave: "파이리", Jolly: "먹고자", Impish: "불꽃숭이", Naive: "에나비", Bold: "꼬부기", Timid: "모부기", Hasty: "피카츄", Sassy: "리아코", Quiet: "치코리타", Relaxed: "식스테일", Rash: "아차모", Quirky: "팽도리", Lonely: "물짱이", Calm: "브케인" }
     };
 
-    const ID_MAP = { "아차모": 255, "파이리": 4, "리아코": 158, "먹고자": 446, "물짱이": 258, "이상해씨": 1, "브케인": 155, "나무지기": 252, "식스테일": 37, "모부기": 387, "꼬부기": 7, "팽도리": 393, "치코리타": 152 };
+    const KOREAN_TYPE_MAP = { Hardy: "노력하는", Docile: "온순한", Brave: "용감한", Jolly: "명랑한", Impish: "장난꾸러기", Naive: "천진난만한", Bold: "대담한", Timid: "겁쟁이", Hasty: "성급한", Sassy: "건방진", Quiet: "냉정한", Relaxed: "무사태평", Rash: "덜렁거리는", Quirky: "변덕스러운", Lonely: "외로움타는", Calm: "차분한" };
+
+    const ID_MAP = { "아차모": 255, "파이리": 4, "피카츄": 25, "리아코": 158, "팽도리": 393, "불꽃숭이": 390, "모부기": 387, "브케인": 155, "에나비": 300, "냐옹": 52, "나무지기": 252, "먹고자": 446, "물짱이": 258, "꼬부기": 7, "이상해씨": 1, "치코리타": 152, "식스테일": 37 };
 
     let userGender = '';
     let currentIdx = 0;
     let scores = {};
+    let testPool = [];
+    const MAX_QUESTIONS = 20;
 
     function init() {
         const ansBox = document.getElementById("answer-box");
@@ -191,26 +181,29 @@
             <button class="btn" onclick="startTest('male')">남자 아이</button>
             <button class="btn" onclick="startTest('female')">여자 아이</button>
         `;
-        document.getElementById("status-text").innerText = "STEP 0 / " + QUESTIONS.length;
     }
 
     function startTest(gender) {
         userGender = gender;
-        ["Hardy","Docile","Jolly","Relaxed","Rash","Lonely","Timid","Quirky","Quiet"].forEach(t => scores[t] = 0);
+        // 성격 스코어 초기화
+        Object.keys(KOREAN_TYPE_MAP).forEach(k => scores[k] = 0);
+        // 질문 20개 랜덤 추출
+        testPool = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, MAX_QUESTIONS);
+        
         if(player && player.playVideo) player.playVideo();
         render();
     }
 
     function render() {
-        if (currentIdx >= QUESTIONS.length) {
+        if (currentIdx >= testPool.length) {
             showResult();
             return;
         }
         
-        const data = QUESTIONS[currentIdx];
+        const data = testPool[currentIdx];
         document.getElementById("text-display").innerText = data.q;
-        document.getElementById("status-text").innerText = `질문 ${currentIdx + 1} / ${QUESTIONS.length}`;
-        document.getElementById("progress-fill").style.width = `${((currentIdx + 1) / QUESTIONS.length) * 100}%`;
+        document.getElementById("progress-text").innerText = `${currentIdx + 1} / ${MAX_QUESTIONS}`;
+        document.getElementById("progress-fill").style.width = `${((currentIdx + 1) / MAX_QUESTIONS) * 100}%`;
 
         const ansBox = document.getElementById("answer-box");
         ansBox.innerHTML = "";
@@ -229,27 +222,29 @@
 
     function showResult() {
         document.getElementById("answer-box").classList.add("hidden");
-        document.getElementById("status-text").innerText = "결과 분석 완료";
+        document.getElementById("progress-text").innerText = "분석 완료";
         
+        // 최고 점수 성격 추출
         const maxScore = Math.max(...Object.values(scores));
         const winners = Object.keys(scores).filter(k => scores[k] === maxScore);
-        const topType = winners[Math.floor(Math.random() * winners.length)];
+        const topTypeKey = winners[Math.floor(Math.random() * winners.length)];
         
-        const name = POKEMON_MAP[userGender][topType] || "피카츄";
+        const typeKR = KOREAN_TYPE_MAP[topTypeKey] || "신비로운";
+        const name = POKEMON_MAP[userGender][topTypeKey] || "피카츄";
         const pokeId = ID_MAP[name] || 25;
 
         const qBox = document.getElementById("question-box");
         qBox.innerHTML = `
             <div class="result-layout">
-                <p style="font-size:1rem; margin-bottom:5px;">당신은 <strong>[${topType}]</strong> 성격이군요!</p>
+                <p>당신은 <strong>[${typeKR}]</strong> 성격이군요!</p>
                 <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png">
-                <p style="font-size:1.5rem; color:var(--border-green);">당신은 <strong>${name}</strong>입니다!</p>
-                <button class="btn" style="display:inline-block; margin-top:10px;" onclick="location.reload()">▶ 다시 테스트하기</button>
+                <p style="font-size:1.4rem;">당신은 <strong>${name}</strong>입니다!</p>
+                <button class="btn" style="display:inline-block; margin-top:10px; padding-left:10px;" onclick="location.reload()">▶ 다시 하기</button>
             </div>
         `;
     }
 
-    // 유튜브 API (음악)
+    // 유튜브 API
     var player;
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
