@@ -50,13 +50,13 @@
             justify-content: center; align-items: center; padding: 20px;
         }
         
-        #intro-text { font-size: 1.3rem; line-height: 1.8; text-align: center; word-break: keep-all; color: #fff; max-width: 85%; min-height: 120px; }
+        #intro-text { font-size: 1.35rem; line-height: 1.8; text-align: center; word-break: keep-all; color: #fff; max-width: 85%; min-height: 120px; }
 
         .next-btn {
             margin-top: 50px; width: 80%; max-width: 250px;
             background: transparent; color: #fff; border: 4px solid var(--border-green);
             padding: 15px; font-family: inherit; font-size: 1.2rem; cursor: pointer;
-            border-radius: 10px; transition: 0.2s;
+            border-radius: 10px; transition: 0.2s; z-index: 1001;
         }
         .next-btn:active { background: var(--border-green); color: #000; }
 
@@ -85,7 +85,6 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             z-index: 2000; text-align: center; color: #fff;
         }
-
         #wave-msg { font-size: 1.35rem; font-weight: bold; padding: 0 30px; line-height: 1.8; min-height: 150px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
 
         .wave-circle {
@@ -96,16 +95,12 @@
         }
         .wave-fill { position: absolute; width: 0%; height: 0%; background: var(--wave-color); border-radius: 50%; opacity: 0.7; transition: 0.1s linear; }
 
-        .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.8s; }
-        .result-nature { font-size: 1.1rem; color: var(--wave-color); margin-bottom: 5px; }
-        .result-pokemon { font-size: 1.8rem; margin-bottom: 10px; border-bottom: 2px solid #fff; padding-bottom: 5px; }
-        .result-desc { font-size: 1rem; line-height: 1.7; margin-bottom: 20px; color: #cbd5e1; word-break: keep-all; max-width: 95%; text-align: center; }
-        #pokemon-img { width: 180px; height: 180px; margin: 10px 0; object-fit: contain; filter: drop-shadow(0 0 15px var(--wave-color)); }
+        .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.8s; max-height: 80vh; overflow-y: auto; }
+        .result-desc { font-size: 1.05rem; line-height: 1.8; margin-bottom: 20px; color: #cbd5e1; word-break: keep-all; max-width: 95%; text-align: center; }
+        #pokemon-img { width: 160px; height: 160px; margin: 10px 0; object-fit: contain; filter: drop-shadow(0 0 15px var(--wave-color)); }
 
-        .btn-retry { text-align: center; padding: 12px 15px; width: 100%; margin-top: 10px; position: relative; }
-        .btn-retry::before { content: '▶'; position: static; margin-right: 8px; }
-        .btn-share { text-align: center; padding: 12px 15px; width: 100%; margin-top: 8px; background: rgba(56, 248, 56, 0.2); border-color: var(--wave-color); }
-        .btn-share::before { content: '▶'; position: static; margin-right: 8px; }
+        .btn-footer { text-align: center; padding: 12px 15px; width: 100%; margin-top: 10px; position: relative; }
+        .btn-footer::before { content: '▶'; position: static; margin-right: 8px; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .anim-pulse { animation: pulse 1s infinite; }
@@ -121,7 +116,7 @@
 
 <div id="intro-layer">
     <div id="intro-text"></div>
-    <button class="next-btn" onclick="nextIntro()">다음</button>
+    <button class="next-btn" id="intro-next-btn">다음</button>
 </div>
 
 <div id="game-container" class="hidden">
@@ -147,42 +142,73 @@
 </div>
 
 <script>
-    // --- 성격별 핵심 특징 (관찰자 시점) ---
-    const NATURE_TRAITS = {
-        Hardy: "작은 일에 연연하지 않고 목표를 향해 달리는 너의 끈기",
-        Docile: "싸움을 싫어하고 남을 먼저 배려하려는 너의 착한 마음씨",
-        Brave: "핀치에 몰린 동료를 위해 기꺼이 나서는 너의 용기",
-        Jolly: "어떤 슬픈 일도 웃으며 털어내는 너의 긍정적인 에너지",
-        Impish: "분위기를 밝게 만들고 장난을 즐기는 너의 활동적인 모습",
-        Naive: "순수하고 거짓말을 할 줄 모르는 너의 맑은 영혼",
-        Bold: "어떤 상황에서도 당황하지 않는 너의 대담한 배짱",
-        Timid: "조금은 신중하고 세심하게 주변을 살피는 너의 사려 깊음",
-        Hasty: "마음먹은 일은 바로 실행에 옮기는 너의 놀라운 추진력",
-        Sassy: "지기 싫어하고 자신감 있게 자기 의견을 말하는 너의 당당함",
-        Quiet: "상황을 객관적으로 분석하고 판단하는 너의 냉철한 지혜",
-        Relaxed: "남들이 뭐라 하든 여유를 잃지 않는 너의 마이페이스",
-        Rash: "조금은 덤벙거려도 금방 기운을 차리는 너의 낙천적인 태도",
-        Quirky: "틀에 얽매이지 않고 자유롭게 생각하는 너의 독특한 발상",
-        Lonely: "겉으로는 강한 척하지만 사실은 따뜻한 정을 그리워하는 너의 마음",
-        Calm: "곤란한 사람을 그냥 지나치지 못하는 너의 상냥한 배려"
-    };
-
+    // --- 방대한 질문 데이터 (65개) ---
     const ALL_QUESTIONS = [
         { q: "휴일인데 아무도 놀아 주지 않는다... 그럼 당신은?", a: [{t: "여행을 떠난다", s: {Jolly: 4, Rash: 2}}, {t: "멍하게 있는다", s: {Relaxed: 4, Calm: 2}}, {t: "방구석에 박혀있는다", s: {Lonely: 4, Quiet: 2}}] },
         { q: "비밀을 무심코 누설해버린 적이 있는가?", a: [{t: "있다", s: {Rash: 4, Lonely: 4}}, {t: "없다", s: {Hardy: 2}}] },
-        { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "절반은 쓰고 전달은 모은다", s: {Calm: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
+        { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "절반은 쓰고 절반은 모은다", s: {Calm: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
         { q: "매일 복근 운동 10회. 계속할 수 있을까?", a: [{t: "이 정도는 누워서 떡 먹기다", s: {Impish: 4, Sassy: 2}}, {t: "열심히 해 본다", s: {Hardy: 4}}, {t: "처음부터 할 생각이 없다", s: {Quirky: 4}}] },
         { q: "모르는 것은 모른다고 솔직하게 말할 수 있는가?", a: [{t: "말할 수 있다", s: {Docile: 4, Bold: 2}}, {t: "잘 말하지 못한다", s: {Timid: 4, Lonely: 2}}] },
         { q: "장래를 점쳐 보니 결과가 매우 나빴다. 너라면?", a: [{t: "매우 불안해진다", s: {Docile: 4, Timid: 2}}, {t: "잊어버린다", s: {Jolly: 4, Relaxed: 2, Bold: 2}}] },
         { q: "굉장히 도움이 되는 정보를 얻었다! 너라면?", a: [{t: "비밀로 간직한다", s: {Bold: 4, Timid: 2}}, {t: "친구에게 가르쳐 준다", s: {Docile: 4, Rash: 4}}, {t: "다른 정보를 흘린다", s: {Impish: 4}}] },
         { q: "풍선을 얼마만큼 불 수 있는가?", a: [{t: "터지기 직전까지 팽팽하게", s: {Brave: 4, Impish: 4}}, {t: "적당히 그만둔다", s: {Quiet: 2}}, {t: "무서워서 불지 못한다", s: {Timid: 4, Docile: 2}}] },
         { q: "모두와 다른 의견이라도 확실히 말할 수 있는가?", a: [{t: "예", s: {Brave: 4, Bold: 2}}, {t: "아니오", s: {Lonely: 4, Timid: 2}}, {t: "상황에 따라 다르다", s: {Calm: 2, Quirky: 2}}] },
+        { q: "매우 좋아하는 사람에게 고백하고 싶다! 너라면?", a: [{t: "일단 함께 놀자고 한다", s: {Jolly: 4, Calm: 2}}, {t: "장난을 쳐서 관심을 끈다", s: {Lonely: 4, Naive: 2}}, {t: "큰 소리로 좋아해! 라고 외친다", s: {Brave: 4, Impish: 4, Bold: 2}}, {t: "두려워서 아무것도 못 한다", s: {Timid: 2}}] },
+        { q: "깜짝 인터뷰를 받았다! 너는 어떻게 하겠는가?", a: [{t: "부끄러워서 도망친다", s: {Timid: 4}}, {t: "당당하게 대답한다", s: {Brave: 4, Sassy: 4}}, {t: "OO야 보고 있니~?", s: {Naive: 4, Bold: 2}}] },
         { q: "기쁜 일이 있으면 무심코 춤을 추는가?", a: [{t: "예", s: {Jolly: 4, Lonely: 2}}, {t: "아니오", s: {Calm: 2}}] },
+        { q: "저편에서 퍼레이드가 다가온다. 너는?", a: [{t: "옆에서 지켜본다", s: {Calm: 2}}, {t: "함께 행진한다", s: {Jolly: 4, Naive: 4}}, {t: "별로 신경 쓰지 않는다", s: {Sassy: 4, Lonely: 2}}] },
+        { q: "친구가 썰렁 개그를 말했다. 너는...", a: [{t: "꺄하하! 박장대소!", s: {Jolly: 4, Naive: 2}}, {t: "못 들은 척한다", s: {Impish: 2, Docile: 2}}, {t: "누가 어떻게 좀 해봐!", s: {Brave: 4}}] },
         { q: "모르는 사람에게도 쉽게 말을 거는가?", a: [{t: "예", s: {Jolly: 4}}, {t: "아니오", s: {Bold: 4, Timid: 2, Docile: 2}}] },
         { q: "자주 다치는 타입인가?", a: [{t: "예", s: {Impish: 4, Rash: 4}}, {t: "아니오", s: {Calm: 2}}] },
+        { q: "둥근 공을 보면 무심코...", a: [{t: "차고 싶어진다", s: {Hasty: 2, Sassy: 2}}, {t: "던지고 싶어진다", s: {Impish: 4}}, {t: "문지르고 싶어진다", s: {Lonely: 4}}] },
         { q: "정글 탐험을 하고 싶은가?", a: [{t: "예", s: {Impish: 4, Naive: 2}}, {t: "아니오", s: {Quirky: 4, Timid: 2}}] },
         { q: "지하실에서 비밀 계단을 발견했다! 너는...", a: [{t: "내려가 본다", s: {Impish: 4, Brave: 4, Rash: 2, Hasty: 2}}, {t: "일단 내버려 둔다", s: {Timid: 2}}] },
-        { q: "친구가 심하게 자빠졌다! 너는?", a: [{t: "바로 도와준다", s: {Brave: 4, Lonely: 2}}, {t: "나도 모르게 웃는다", s: {Naive: 4, Impish: 4, Rash: 2}}] }
+        { q: "친구가 심하게 자빠졌다! 너는?", a: [{t: "바로 도와준다", s: {Brave: 4, Lonely: 2}}, {t: "나도 모르게 웃는다", s: {Naive: 4, Impish: 4, Rash: 2}}] },
+        { q: "진심으로 외계인을 불러내려고 한 적이 있는가?", a: [{t: "있다", s: {Naive: 4}}, {t: "없다", s: {Quiet: 2}}] },
+        { q: "농담으로 친구를 놀리다가 울려버린 적이 있는가?", a: [{t: "예", s: {Naive: 4}}, {t: "아니오", s: {Calm: 4}}] },
+        { q: "너의 뒤에 누군가 있다...", a: [{t: "무서우니까 그만둬!", s: {Timid: 4}}, {t: "뭐야 속인 거군!", s: {Docile: 4}}, {t: "그 수법엔 안 속아!", s: {Sassy: 4, Lonely: 4}}, {t: "엥 뭐야?", s: {Relaxed: 4}}] },
+        { q: "가게 점원이 그저 그런 상품을 권해온다. 너는?", a: [{t: "단호하게 거절한다", s: {Brave: 2, Quiet: 2}}, {t: "부드럽게 거절한다", s: {Calm: 4, Lonely: 2}}, {t: "아무 말 못하고 사버린다", s: {Rash: 2, Timid: 2}}] },
+        { q: "서먹한 친구와 둘만 남게 되었다. 너는?", a: [{t: "쓸데없는 이야기를 한다", s: {Calm: 2}}, {t: "아무 말도 하지 않는다", s: {Quirky: 2}}, {t: "이유를 만들어 도망친다", s: {Timid: 4}}] },
+        { q: "누가 부른 것 같은데 아무도 없다. 무엇이라 생각하나?", a: [{t: "분명 기분 탓", s: {Relaxed: 4}}, {t: "누군가의 장난", s: {Naive: 4, Bold: 2}}, {t: "혹시... 귀신?", s: {Timid: 4}}] },
+        { q: "착각할 때가 자주 있는가?", a: [{t: "예", s: {Hasty: 4, Rash: 4}}, {t: "아니오", s: {Docile: 2, Quiet: 2}}] },
+        { q: "TV 채널을 자주 바꾸는가?", a: [{t: "예", s: {Hasty: 4}}, {t: "아니오", s: {Calm: 2}}] },
+        { q: "싸고 질 좋은 상품을 발견했다!", a: [{t: "바로 사버린다!", s: {Hasty: 4}}, {t: "정말 필요한지 생각한다", s: {Quiet: 2}}, {t: "가격을 더 깎는다", s: {Bold: 4}}] },
+        { q: "소풍 과자가 너무 먹고 싶다!", a: [{t: "조금만 먹는다", s: {Hasty: 4}}, {t: "꾹 참는다", s: {Hardy: 4}}, {t: "정신차려보니 다 먹었다", s: {Rash: 4}}] },
+        { q: "잘난 체 하는 사람을 보면 반발심이 생기나?", a: [{t: "예", s: {Sassy: 4}}, {t: "아니오", s: {Calm: 2}}] },
+        { q: "항상 남보다 앞서가고 싶은가?", a: [{t: "예", s: {Sassy: 4, Lonely: 2}}, {t: "아니오", s: {Calm: 4, Quirky: 2}}] },
+        { q: "나는 혹시 천재? 라고 생각한 적이 있다.", a: [{t: "예", s: {Sassy: 4, Naive: 2, Jolly: 2}}, {t: "아니오", s: {Hardy: 2}}] },
+        { q: "손윗사람에게 의견을 확실히 말하나?", a: [{t: "예", s: {Sassy: 4, Brave: 4, Bold: 2}}, {t: "아니오", s: {Timid: 2}}] },
+        { q: "도시와 시골 중 어느 쪽이 좋은가?", a: [{t: "도시", s: {Lonely: 4, Sassy: 2}}, {t: "시골", s: {Calm: 4}}, {t: "어느 쪽이든 좋다", s: {Quirky: 4}}] },
+        { q: "남은 만두 1개를 친구가 먹어버렸다!", a: [{t: "뭐 괜찮아", s: {Calm: 4}}, {t: "분노 폭발!", s: {Relaxed: 4, Jolly: 4}}, {t: "슬퍼서 운다", s: {Lonely: 4}}] },
+        { q: "도미노를 거의 다 쌓았는데 쓰러뜨렸다!", a: [{t: "충격으로 멍해진다", s: {Hardy: 4}}, {t: "분노 폭발!", s: {Docile: 4}}, {t: "다시 쌓기 시작한다", s: {Calm: 4, Bold: 4}}] },
+        { q: "주위가 소란스러워도 신경 쓰이지 않나?", a: [{t: "예", s: {Bold: 4, Relaxed: 2}}, {t: "아니오", s: {Lonely: 4, Hasty: 2}}] },
+        { q: "배부른데 좋아하는 디저트가 나왔다!", a: [{t: "무리해서 먹는다", s: {Hasty: 4, Rash: 2}}, {t: "그만둔다", s: {Hardy: 2}}, {t: "디저트 배는 따로 있다!", s: {Bold: 4, Jolly: 4, Relaxed: 2}}] },
+        { q: "내일은 중요한 시험이다!", a: [{t: "밤새워 공부한다", s: {Hardy: 4}}, {t: "어떻게든 되겠지", s: {Relaxed: 4}}, {t: "왠지 열이 나는데?", s: {Naive: 4}}] },
+        { q: "레스토랑에서 갑자기 사람들이 사라졌다!", a: [{t: "점원을 찾는다", s: {Lonely: 4, Docile: 4}}, {t: "계속 먹는다", s: {Jolly: 4, Relaxed: 4}}, {t: "남은 음식을 먹는다", s: {Bold: 4}}] },
+        { q: "정신 차려보니 콧노래를 부를 때가 있나?", a: [{t: "예", s: {Relaxed: 4}}, {t: "아니오", s: {Quiet: 2}}] },
+        { q: "전화가 왔다! 너는?", a: [{t: "서둘러 받는다", s: {Hasty: 4, Lonely: 4}}, {t: "조금 기다렸다 받는다", s: {Quiet: 2}}, {t: "일부러 안 받는다", s: {Timid: 2}}] },
+        { q: "친구가 즐겁게 대화하고 있다. 너는?", a: [{t: "궁금해서 다가간다", s: {Naive: 4}}, {t: "신경 쓰지 않는다", s: {Lonely: 4}}, {t: "귀를 기울인다", s: {Timid: 2}}] },
+        { q: "주목받는 것을 좋아하는가?", a: [{t: "예", s: {Lonely: 4, Sassy: 4}}, {t: "아니오", s: {Relaxed: 2}}] },
+        { q: "아무것도 없는 방에서 기다려야 한다면?", a: [{t: "얌전히 기다린다", s: {Docile: 4}}, {t: "뭔가 없는지 찾는다", s: {Naive: 4}}, {t: "무심코 나가버린다", s: {Rash: 4}}, {t: "구석에 웅크려 앉는다", s: {Lonely: 4}}] },
+        { q: "사놓고 안 쓰는 물건이 많은가?", a: [{t: "예", s: {Quirky: 4, Rash: 2, Hasty: 2}}, {t: "아니오", s: {Quiet: 2}}] },
+        { q: "꾸준히 하는 취미가 있는가?", a: [{t: "있다", s: {Hardy: 4}}, {t: "없다", s: {Quirky: 4, Hasty: 2}}] },
+        { q: "약속을 직전에 취소한 적이 있나?", a: [{t: "있다", s: {Quirky: 4, Rash: 4}}, {t: "없다", s: {Calm: 2}}] },
+        { q: "계획대로 행동하는가?", a: [{t: "그런 편이다", s: {Hardy: 4}}, {t: "잘 안 된다", s: {Quirky: 4, Rash: 2}}, {t: "계획은 안 세운다", s: {Relaxed: 4}}] },
+        { q: "때로는 거짓말도 필요하다고 생각하나?", a: [{t: "예", s: {Quiet: 4, Bold: 4}}, {t: "아니오", s: {Brave: 4}}, {t: "모른다", s: {Docile: 4}}] },
+        { q: "유령선 안에는 무엇이 있을까?", a: [{t: "보물!", s: {Naive: 4, Jolly: 2}}, {t: "귀신 가득", s: {Timid: 2}}, {t: "환상일 뿐", s: {Quiet: 4}}] },
+        { q: "이기기 위해선 무슨 짓이든 해도 되나?", a: [{t: "그렇다", s: {Quiet: 4, Sassy: 4}}, {t: "아니다", s: {Brave: 4}}] },
+        { q: "친구가 울고 있다. 이유는?", a: [{t: "누가 괴롭혔다", s: {Hasty: 4}}, {t: "넘어졌다", s: {Quiet: 4}}, {t: "나 때문인가?", s: {Timid: 2}}] },
+        { q: "문단속을 잊고 외출한 적이 있나?", a: [{t: "있다", s: {Rash: 4, Bold: 2}}, {t: "없다", s: {Quiet: 2}}] },
+        { q: "친구 집에서 저녁을 먹는다!", a: [{t: "마구 먹는다", s: {Impish: 4, Naive: 4}}, {t: "주저하며 먹는다", s: {Hardy: 2}}, {t: "남은 거 싸달라고 한다", s: {Bold: 4}}] },
+        { q: "무거운 짐이 있다면?", a: [{t: "혼자 옮긴다", s: {Hardy: 4, Brave: 2}}, {t: "도움을 받는다", s: {Docile: 2}}, {t: "남에게 시킨다", s: {Bold: 4, Sassy: 2}}] },
+        { q: "공동묘지에 젖은 여자가 서 있다!", a: [{t: "도망친다", s: {Timid: 2}}, {t: "변장이지?", s: {Naive: 4, Sassy: 2}}, {t: "죽은 척한다", s: {Rash: 4}}] },
+        { q: "하루 지난 케이크가 있다!", a: [{t: "그냥 먹는다", s: {Brave: 4, Relaxed: 2}}, {t: "고민하다 안 먹는다", s: {Timid: 2}}, {t: "남 먹여본다", s: {Bold: 4}}] },
+        { q: "셔츠를 뒤집어 입었다는 소리를 들었다!", a: [{t: "동요한다", s: {Docile: 4}}, {t: "크게 웃는다", s: {Rash: 4}}, {t: "얼버무린다", s: {Jolly: 4}}] },
+        { q: "누가 물을 끼얹었다!", a: [{t: "화낸다", s: {Hasty: 4}}, {t: "운다", s: {Lonely: 4}}, {t: "물싸움이다!", s: {Jolly: 4, Naive: 4, Impish: 4}}] },
+        { q: "연극에서 맡고 싶은 역할은?", a: [{t: "주연", s: {Bold: 4}}, {t: "조연", s: {Jolly: 4}}, {t: "단역", s: {Quirky: 4}}] },
+        { q: "수업 중 화장실에 가고 싶다면?", a: [{t: "손들고 간다", s: {Brave: 4, Bold: 4}}, {t: "몰래 간다", s: {Hasty: 2}}, {t: "필사적으로 참는다", s: {Timid: 2}}] },
+        { q: "마라톤 골인 직전! 너무 괴롭다면?", a: [{t: "끝까지 완주", s: {Hardy: 4, Brave: 2}}, {t: "포기한다", s: {Quirky: 4}}, {t: "지름길로 간다", s: {Bold: 4, Rash: 2}}] },
+        { q: "길에서 좋은 냄새가 난다!", a: [{t: "상상한다", s: {Docile: 4}}, {t: "냄새를 따라간다", s: {Naive: 4, Rash: 2}}, {t: "배가 고파진다", s: {Impish: 4}}] }
     ];
 
     const KOREAN_TYPE_MAP = { Hardy: "노력하는", Docile: "온순한", Brave: "용감한", Jolly: "명랑한", Impish: "장난꾸러기", Naive: "천진난만한", Bold: "대담한", Timid: "겁쟁이", Hasty: "성급한", Sassy: "건방진", Quiet: "냉정한", Relaxed: "무사태평", Rash: "덜렁거리는", Quirky: "변덕스러운", Lonely: "외로움타는", Calm: "차분한" };
@@ -190,29 +216,71 @@
     const ID_MAP = { "아차모": 255, "파이리": 4, "피카츄": 25, "리아코": 158, "팽도리": 393, "불꽃숭이": 390, "모부기": 387, "브케인": 155, "에나비": 300, "냐옹": 52, "나무지기": 252, "먹고자": 446, "물짱이": 258, "꼬부기": 7, "이상해씨": 1, "치코리타": 152, "식스테일": 37 };
     const WAVE_COLORS = { Hardy: { color: "#ff4d4d", name: "정열적인 레드" }, Brave: { color: "#ff4d4d", name: "정열적인 레드" }, Rash: { color: "#ff4d4d", name: "정열적인 레드" }, Jolly: { color: "#ff80df", name: "귀여운 핑크" }, Naive: { color: "#ff80df", name: "귀여운 핑크" }, Relaxed: { color: "#33ccff", name: "맑은 스카이블루" }, Quiet: { color: "#33ccff", name: "맑은 스카이블루" }, Calm: { color: "#3366ff", name: "깊은 로열블루" }, Timid: { color: "#ffa31a", name: "따뜻한 오렌지" }, Hasty: { color: "#ffa31a", name: "따뜻한 오렌지" }, Sassy: { color: "#cc66ff", name: "신비로운 퍼플" }, Quirky: { color: "#cc66ff", name: "신비로운 퍼플" }, Bold: { color: "#ffff33", name: "눈부신 골드" }, Impish: { color: "#ffff33", name: "눈부신 골드" }, Docile: { color: "#38f838", name: "청명한 에메랄드" }, Lonely: { color: "#38f838", name: "청명한 에메랄드" } };
 
-    let typingTimer = null, isTyping = false, introIdx = 0, currentIdx = 0, scores = {}, testPool = [], userGender = '', finalNature = "", player = null;
-    let userChoices = []; // 사용자가 선택한 답변을 저장
+    const INTRO_TEXTS = [
+        "어서 오너라!",
+        "여기는 포켓몬들의 세계로\n통하는 입구다!",
+        "이 문 너머에는 네가 상상하지 못한\n다양한 모험이 기다리고 있을 것이다!",
+        "하지만 모험에 나서기 전에\n너에게 몇 가지 질문이 있다.",
+        "솔직하게 대답해 주길 바란다.",
+        "준비는 되었는가?",
+        "그럼... 질문 시작하겠다!"
+    ];
 
-    function onYouTubeIframeAPIReady() { player = new YT.Player('player', { videoId: 'ehI75lWfXhw', playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'controls': 0, 'disablekb': 1, 'playsinline': 1 }, events: { 'onReady': (e) => e.target.setVolume(30) } }); }
+    // --- 앱 상태 관리 ---
+    let typingTimer = null, isTyping = false, currentFullText = "", introIdx = 0, currentIdx = 0, scores = {}, testPool = [], userGender = '', finalNature = "", player = null, userChoices = [];
+
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+            videoId: 'ehI75lWfXhw',
+            playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'controls': 0, 'disablekb': 1, 'playsinline': 1 },
+            events: { 'onReady': (e) => e.target.setVolume(30) }
+        });
+    }
 
     function typeWriter(text, elementId, callback) {
-        if (isTyping) { clearInterval(typingTimer); isTyping = false; }
+        if (typingTimer) clearInterval(typingTimer);
         isTyping = true;
+        currentFullText = text;
         const el = document.getElementById(elementId);
+        if (!el) return;
         el.innerText = ""; el.classList.remove('cursor');
         let i = 0;
         typingTimer = setInterval(() => {
-            if (i < text.length) { el.append(text.charAt(i)); i++; }
-            else { clearInterval(typingTimer); isTyping = false; el.classList.add('cursor'); if (callback) callback(); }
+            if (i < text.length) {
+                el.append(text.charAt(i));
+                i++;
+            } else {
+                completeTyping(elementId, callback);
+            }
         }, 30);
     }
 
-    function nextIntro() {
-        if (isTyping) return;
-        if (introIdx === 0 && player && player.playVideo) player.playVideo();
-        if (introIdx < INTRO_TEXTS.length) { typeWriter(INTRO_TEXTS[introIdx], "intro-text"); introIdx++; }
-        else { document.getElementById("intro-layer").classList.add("hidden"); document.getElementById("game-container").classList.remove("hidden"); askGender(); }
+    function completeTyping(elementId, callback) {
+        clearInterval(typingTimer);
+        typingTimer = null;
+        const el = document.getElementById(elementId);
+        el.innerText = currentFullText;
+        el.classList.add('cursor');
+        isTyping = false;
+        if (callback) callback();
     }
+
+    // 인트로 버튼 이벤트 리스너 최적화
+    document.getElementById("intro-next-btn").addEventListener("click", () => {
+        if (isTyping) {
+            completeTyping("intro-text");
+            return;
+        }
+        if (introIdx === 0 && player && player.playVideo) player.playVideo();
+        if (introIdx < INTRO_TEXTS.length) {
+            typeWriter(INTRO_TEXTS[introIdx], "intro-text");
+            introIdx++;
+        } else {
+            document.getElementById("intro-layer").classList.add("hidden");
+            document.getElementById("game-container").classList.remove("hidden");
+            askGender();
+        }
+    });
 
     function askGender() {
         document.getElementById("answer-box").innerHTML = "";
@@ -227,6 +295,7 @@
     function setGender(gender) {
         userGender = gender; currentIdx = 0; userChoices = [];
         Object.keys(KOREAN_TYPE_MAP).forEach(k => scores[k] = 0);
+        // 전체 65개 질문 중 무작위 20개 선정 (원작 사양)
         testPool = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 20);
         render();
     }
@@ -235,8 +304,9 @@
         if (currentIdx >= testPool.length) { calculateResult(); startWaveScan(); return; }
         const data = testPool[currentIdx];
         document.getElementById("answer-box").innerHTML = "";
-        document.getElementById("step-count").innerText = `${currentIdx + 1} / 20`;
-        document.getElementById("progress-fill").style.width = `${((currentIdx + 1) / 20) * 100}%`;
+        document.getElementById("step-count").innerText = `${currentIdx + 1} / ${testPool.length}`;
+        document.getElementById("progress-fill").style.width = `${((currentIdx + 1) / testPool.length) * 100}%`;
+        
         typeWriter(data.q, "text-display", () => {
             data.a.forEach(ans => {
                 const btn = document.createElement("button");
@@ -244,7 +314,7 @@
                 btn.onclick = () => { 
                     if (isTyping) return; 
                     for (let s in ans.s) scores[s] = (scores[s] || 0) + ans.s[s]; 
-                    userChoices.push(ans.t); // 답변 저장
+                    userChoices.push(ans.t);
                     currentIdx++; render(); 
                 };
                 document.getElementById("answer-box").appendChild(btn);
@@ -296,33 +366,31 @@
         const natureName = KOREAN_TYPE_MAP[finalNature], resultName = POKEMON_MAP[userGender][finalNature], pokeId = ID_MAP[resultName];
         document.getElementById("answer-box").innerHTML = "";
         
-        // 랜덤하게 사용자가 선택한 답변 3개를 골라 문장을 구성
-        const sampledChoices = [...userChoices].sort(() => 0.5 - Math.random()).slice(0, 3);
-        const choiceText = `아까 질문에서 '${sampledChoices[0]}'거나, '${sampledChoices[1]}'는 쪽을 택하더구나.`;
-
+        // 사용자가 선택한 답변 중 무작위 2개 추출
+        const sampledChoices = [...userChoices].sort(() => 0.5 - Math.random()).slice(0, 2);
+        
         typeWriter(`...너의 선택들을 곰곰이 지켜보았단다.`, "text-display", () => {
             setTimeout(() => {
                 document.getElementById("question-box").innerHTML = `
                     <div class="result-layout">
                         <div class="result-desc">
-                            너는 아까 질문에서<br>'<span style="color:var(--wave-color)">${sampledChoices[0]}</span>'거나, 
+                            너는 아까 질문에서<br>'<span style="color:var(--wave-color)">${sampledChoices[0]}</span>'거나,<br> 
                             '<span style="color:var(--wave-color)">${sampledChoices[1]}</span>'는 쪽을 택하더구나.<br><br>
-                            그걸 보니 너는 아무래도...<br>[${natureName}] 성격인 거 같아.<br><br>
-                            ${NATURE_TRAITS[finalNature]}이(가)<br>대답 속에 고스란히 담겨있어.
+                            그걸 보니 너는 아무래도...<br>[${natureName}] 성격인 거 같아.
                         </div>
-                        <div class="result-nature" style="color:var(--wave-color); margin-top:10px;">그런 [${natureName}] 성격인 너는...</div>
-                        <div class="result-pokemon">${resultName}!</div>
-                        <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png">
-                        <button class="btn btn-retry" onclick="location.reload()">다시 하기</button>
-                        <button class="btn btn-share" onclick="copyResult('${natureName}', '${resultName}')">결과 복사하기</button>
+                        <div style="color:var(--wave-color); font-weight:bold; margin-top:10px;">그런 [${natureName}] 성격인 너는...</div>
+                        <div style="font-size:1.8rem; border-bottom:2px solid #fff; margin-bottom:15px; padding-bottom:5px;">${resultName}!</div>
+                        <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png" alt="result">
+                        <button class="btn btn-footer" onclick="location.reload()">다시 하기</button>
+                        <button class="btn btn-footer" style="background:rgba(56,248,56,0.1); border-color:var(--wave-color);" onclick="copyResult('${natureName}', '${resultName}')">결과 복사하기</button>
                     </div>`;
             }, 1000);
         });
     }
 
     function copyResult(nature, poke) {
-        const text = `[포켓몬 성격 테스트 결과]\n나의 성격: ${nature}\n나와 닮은 포켓몬: ${poke}\n지금 테스트 해보기: ${window.location.href}`;
-        navigator.clipboard.writeText(text).then(() => alert("결과가 클립보드에 복사되었습니다!"));
+        const text = `[포켓몬 성격 테스트]\n나의 성격: ${nature}\n닮은 포켓몬: ${poke}\n테스트 하기: ${window.location.href}`;
+        navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
     }
 
     window.onload = () => typeWriter("... (아래 버튼을 눌러 시작하세요)", "intro-text");
