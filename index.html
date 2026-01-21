@@ -2,9 +2,15 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>포켓몬 성격 테스트 | PMD Master</title>
     
+    <!-- Open Graph (SNS 공유용) -->
+    <meta property="og:title" content="포켓몬 성격 테스트 | PMD Master">
+    <meta property="og:description" content="나의 파동(Wave)으로 확인하는 나의 포켓몬 성격 진단!">
+    <meta property="og:image" content="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png">
+    <meta property="og:type" content="website">
+
     <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
@@ -17,13 +23,14 @@
             --bg-grid: rgba(56, 248, 56, 0.05);
         }
 
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; touch-action: manipulation; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; }
         
         body {
             font-family: 'DungGeunMo', monospace;
             margin: 0; padding: 0;
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh;
+            min-height: 100dvh;
             background-color: var(--bg-dark);
             background-image: linear-gradient(var(--bg-grid) 1px, transparent 1px),
                               linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
@@ -39,86 +46,93 @@
             background: var(--window-bg);
             border: 4px solid var(--border-green);
             border-radius: 8px;
-            box-shadow: 0 0 15px rgba(56, 248, 56, 0.2);
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
             padding: 20px;
             position: relative;
         }
 
+        /* 인트로 */
         #intro-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 1000; display: flex; flex-direction: column;
             justify-content: center; align-items: center; padding: 20px;
         }
-        
-        #intro-text { font-size: 1.35rem; line-height: 1.8; text-align: center; word-break: keep-all; color: #fff; max-width: 85%; min-height: 120px; }
+        #intro-text { font-size: 1.3rem; line-height: 1.8; text-align: center; word-break: keep-all; color: #fff; max-width: 85%; min-height: 120px; cursor: pointer; }
 
         .next-btn {
             margin-top: 50px; width: 80%; max-width: 250px;
             background: transparent; color: #fff; border: 4px solid var(--border-green);
-            padding: 15px; font-family: inherit; font-size: 1.2rem; cursor: pointer;
-            border-radius: 10px; transition: 0.2s; z-index: 1001;
+            padding: 16px; font-family: inherit; font-size: 1.2rem; cursor: pointer;
+            border-radius: 12px; transition: 0.2s; z-index: 1001;
         }
-        .next-btn:active { background: var(--border-green); color: #000; }
+        .next-btn:active { background: var(--border-green); color: #000; transform: scale(0.95); }
 
-        .status-bar { display: flex; justify-content: space-between; color: var(--border-green); font-size: 14px; margin-bottom: 5px; }
-        .progress-bar { height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
-        #progress-fill { height: 100%; background: var(--border-green); width: 0%; transition: width 0.3s; }
+        /* 진행도 */
+        .status-bar { display: flex; justify-content: space-between; color: var(--border-green); font-size: 14px; margin-bottom: 8px; }
+        .progress-bar { height: 10px; background: #334155; border-radius: 5px; overflow: hidden; }
+        #progress-fill { height: 100%; background: var(--border-green); width: 0%; transition: width 0.4s; }
 
-        #question-box { min-height: 140px; font-size: 1.15rem; line-height: 1.6; display: flex; align-items: center; justify-content: center; text-align: center; word-break: keep-all; }
-        #answer-box { display: flex; flex-direction: column; gap: 10px; min-height: 150px; }
+        #question-box { min-height: 160px; font-size: 1.2rem; line-height: 1.7; display: flex; align-items: center; justify-content: center; text-align: center; word-break: keep-all; cursor: pointer; }
+        #answer-box { display: flex; flex-direction: column; gap: 12px; min-height: 150px; }
 
-        .cursor::after { content: ' ▼'; animation: blink 0.8s infinite; color: var(--border-green); font-size: 0.9rem; }
+        .cursor::after { content: ' ▼'; animation: blink 0.8s infinite; color: var(--border-green); }
         @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 
+        /* 공통 버튼 */
         .btn {
             background: rgba(255,255,255,0.05); border: 2px solid transparent; color: var(--text-white);
             font-family: inherit; font-size: 1.1rem; text-align: left;
-            padding: 12px 15px 12px 35px; cursor: pointer; position: relative;
-            border-radius: 5px; transition: 0.2s;
+            padding: 14px 15px 14px 40px; cursor: pointer; position: relative;
+            border-radius: 8px; transition: 0.2s;
         }
-        .btn:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--wave-color); }
-        .btn::before { content: '▶'; position: absolute; left: 12px; }
+        .btn:hover { background: rgba(56, 248, 56, 0.1); border-color: var(--wave-color); }
+        .btn::before { content: '▶'; position: absolute; left: 15px; color: var(--border-green); }
 
+        /* 파동(Aura) 감지 */
         #wave-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, var(--wave-color) 0%, #000 95%);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             z-index: 2000; text-align: center; color: #fff;
         }
-        #wave-msg { font-size: 1.35rem; font-weight: bold; padding: 0 30px; line-height: 1.8; min-height: 150px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-
+        #wave-msg { font-size: 1.35rem; font-weight: bold; padding: 0 40px; line-height: 1.8; min-height: 160px; text-shadow: 2px 2px 8px #000; }
         .wave-circle {
-            width: 140px; height: 140px; border: 4px solid var(--wave-color);
-            border-radius: 50%; margin-top: 30px; position: relative;
+            width: 150px; height: 150px; border: 5px solid var(--wave-color);
+            border-radius: 50%; margin-top: 40px; position: relative;
             display: flex; justify-content: center; align-items: center; overflow: hidden;
-            box-shadow: 0 0 20px var(--wave-color); cursor: pointer;
+            box-shadow: 0 0 30px var(--wave-color); cursor: pointer;
+            touch-action: none;
         }
-        .wave-fill { position: absolute; width: 0%; height: 0%; background: var(--wave-color); border-radius: 50%; opacity: 0.7; transition: 0.1s linear; }
+        .wave-fill { position: absolute; width: 0%; height: 0%; background: var(--wave-color); border-radius: 50%; opacity: 0.7; }
 
-        .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.8s; max-height: 85vh; overflow-y: auto; padding: 5px; }
-        .result-desc { font-size: 1.05rem; line-height: 1.8; margin-bottom: 20px; color: #cbd5e1; word-break: keep-all; max-width: 95%; text-align: center; }
-        #pokemon-img { width: 160px; height: 160px; margin: 10px 0; object-fit: contain; filter: drop-shadow(0 0 15px var(--wave-color)); }
+        /* 결과 창 */
+        .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.8s; max-height: 75vh; overflow-y: auto; padding: 10px; }
+        .result-desc { font-size: 1.05rem; line-height: 1.8; margin-bottom: 25px; color: #cbd5e1; text-align: center; }
+        #pokemon-img { width: 180px; height: 180px; margin: 15px 0; object-fit: contain; filter: drop-shadow(0 0 20px var(--wave-color)); }
 
-        .btn-footer { text-align: center; padding: 12px 15px; width: 100%; margin-top: 10px; position: relative; }
-        .btn-footer::before { content: '▶'; position: static; margin-right: 8px; }
+        .btn-footer { text-align: center; padding: 14px; width: 100%; margin-top: 10px; position: relative; display: block; text-decoration: none; }
+        .btn-footer::before { content: '▶'; position: static; margin-right: 10px; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .anim-pulse { animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         
         .hidden { display: none !important; }
         #player { position: fixed; bottom: 0; right: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+        .audio-ctrl { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; color: #64748b; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div id="player"></div>
 
+<!-- 인트로 -->
 <div id="intro-layer">
     <div id="intro-text"></div>
-    <button class="next-btn" id="intro-next-btn">다음</button>
+    <button class="next-btn" id="intro-next-btn">다음 (Next)</button>
 </div>
 
+<!-- 메인 컨테이너 -->
 <div id="game-container" class="hidden">
     <div id="ui-header">
         <div class="status-bar">
@@ -131,8 +145,15 @@
         <div id="text-display"></div>
     </div>
     <div id="answer-box" class="window"></div>
+    
+    <!-- 오디오 컨트롤 -->
+    <div class="audio-ctrl">
+        <span id="mute-icon" style="cursor:pointer; font-size:16px;">🔊</span>
+        <input type="range" id="volume-slider" min="0" max="100" value="30" style="accent-color:var(--border-green); width:60px;">
+    </div>
 </div>
 
+<!-- 파동 감지 -->
 <div id="wave-layer" class="hidden">
     <div id="wave-msg"></div>
     <div class="wave-circle hidden" id="wave-trigger">
@@ -142,15 +163,8 @@
 </div>
 
 <script>
-    const INTRO_TEXTS = [
-        "어서 오너라!",
-        "여기는 포켓몬들의 세계로\n통하는 입구다!",
-        "이 문 너머에는 네가 상상하지 못한\n다양한 모험이 기다리고 있을 것이다!",
-        "하지만 모험에 나서기 전에\n너에게 몇 가지 질문이 있다.",
-        "솔직하게 대답해 주길 바란다.",
-        "준비는 되었는가?",
-        "그럼... 질문 시작하겠다!"
-    ];
+    // --- 데이터 ---
+    const INTRO_TEXTS = ["어서 오너라!", "여기는 포켓몬들의 세계로\n통하는 입구다!", "이 문 너머에는 네가 상상하지 못한\n다양한 모험이 기다리고 있을 것이다!", "하지만 모험에 나서기 전에\n너에게 몇 가지 질문이 있다.", "솔직하게 대답해 주길 바란다.", "준비는 되었는가?", "그럼... 질문 시작하겠다!"];
 
     const ALL_QUESTIONS = [
         { q: "휴일인데 아무도 놀아 주지 않는다... 그럼 당신은?", a: [{t: "여행을 떠난다", s: {Jolly: 4, Rash: 2}}, {t: "멍하게 있는다", s: {Relaxed: 4, Calm: 2}}, {t: "방구석에 박혀있는다", s: {Lonely: 4, Quiet: 2}}] },
@@ -225,8 +239,11 @@
     const ID_MAP = { "아차모": 255, "파이리": 4, "피카츄": 25, "리아코": 158, "팽도리": 393, "불꽃숭이": 390, "모부기": 387, "브케인": 155, "에나비": 300, "냐옹": 52, "나무지기": 252, "먹고자": 446, "물짱이": 258, "꼬부기": 7, "이상해씨": 1, "치코리타": 152, "식스테일": 37 };
     const WAVE_COLORS = { Hardy: { color: "#ff4d4d", name: "정열적인 레드" }, Brave: { color: "#ff4d4d", name: "정열적인 레드" }, Rash: { color: "#ff4d4d", name: "정열적인 레드" }, Jolly: { color: "#ff80df", name: "귀여운 핑크" }, Naive: { color: "#ff80df", name: "귀여운 핑크" }, Relaxed: { color: "#33ccff", name: "맑은 스카이블루" }, Quiet: { color: "#33ccff", name: "맑은 스카이블루" }, Calm: { color: "#3366ff", name: "깊은 로열블루" }, Timid: { color: "#ffa31a", name: "따뜻한 오렌지" }, Hasty: { color: "#ffa31a", name: "따뜻한 오렌지" }, Sassy: { color: "#cc66ff", name: "신비로운 퍼플" }, Quirky: { color: "#cc66ff", name: "신비로운 퍼플" }, Bold: { color: "#ffff33", name: "눈부신 골드" }, Impish: { color: "#ffff33", name: "눈부신 골드" }, Docile: { color: "#38f838", name: "청명한 에메랄드" }, Lonely: { color: "#38f838", name: "청명한 에메랄드" } };
 
-    let typingTimer = null, isTyping = false, currentFullText = "", introIdx = 0, currentIdx = 0, scores = {}, testPool = [], userGender = '', finalNature = "", player = null, userChoices = [];
+    // --- 앱 엔진 상태 ---
+    let typingTimer = null, isTyping = false, currentFullText = "", activeCallback = null, activeElementId = "";
+    let introIdx = 0, currentIdx = 0, scores = {}, testPool = [], userGender = '', finalNature = "", player = null, userChoices = [];
 
+    // 유튜브 API
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
             videoId: 'ehI75lWfXhw',
@@ -235,36 +252,51 @@
         });
     }
 
+    // 타이핑 스킵 기능
+    function skipTypewriter() {
+        if (isTyping) {
+            clearInterval(typingTimer);
+            const el = document.getElementById(activeElementId);
+            if (el) el.innerText = currentFullText;
+            document.querySelectorAll('.window').forEach(w => w.classList.add('cursor'));
+            isTyping = false;
+            if (activeCallback) {
+                const cb = activeCallback;
+                activeCallback = null;
+                cb();
+            }
+        }
+    }
+
     function typeWriter(text, elementId, callback) {
         if (typingTimer) clearInterval(typingTimer);
         isTyping = true;
         currentFullText = text;
+        activeElementId = elementId;
+        activeCallback = callback;
         const el = document.getElementById(elementId);
         if (!el) return;
-        el.innerText = ""; el.classList.remove('cursor');
+        el.innerText = "";
+        el.parentElement.classList.remove('cursor');
         let i = 0;
         typingTimer = setInterval(() => {
             if (i < text.length) {
                 el.append(text.charAt(i));
                 i++;
             } else {
-                completeTyping(elementId, callback);
+                clearInterval(typingTimer);
+                isTyping = false;
+                el.parentElement.classList.add('cursor');
+                activeCallback = null;
+                if (callback) callback();
             }
-        }, 30);
+        }, 35);
     }
 
-    function completeTyping(elementId, callback) {
-        clearInterval(typingTimer);
-        typingTimer = null;
-        const el = document.getElementById(elementId);
-        el.innerText = currentFullText;
-        el.classList.add('cursor');
-        isTyping = false;
-        if (callback) callback();
-    }
-
-    document.getElementById("intro-next-btn").addEventListener("click", () => {
-        if (isTyping) { completeTyping("intro-text"); return; }
+    // 인트로 이벤트
+    document.getElementById("intro-next-btn").addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (isTyping) { skipTypewriter(); return; }
         if (introIdx === 0 && player && player.playVideo) player.playVideo();
         if (introIdx < INTRO_TEXTS.length) {
             typeWriter(INTRO_TEXTS[introIdx], "intro-text");
@@ -274,6 +306,16 @@
             document.getElementById("game-container").classList.remove("hidden");
             askGender();
         }
+    });
+
+    document.getElementById("intro-text").addEventListener("click", (e) => {
+        e.stopPropagation();
+        skipTypewriter();
+    });
+
+    document.getElementById("question-box").addEventListener("click", (e) => {
+        e.stopPropagation();
+        skipTypewriter();
     });
 
     function askGender() {
@@ -304,10 +346,11 @@
             data.a.forEach(ans => {
                 const btn = document.createElement("button");
                 btn.className = "btn"; btn.innerText = ans.t;
-                btn.onclick = () => { 
+                btn.onclick = (e) => { 
+                    e.stopPropagation();
                     if (isTyping) return; 
                     for (let s in ans.s) scores[s] = (scores[s] || 0) + ans.s[s]; 
-                    userChoices.push({ q: data.q, a: ans.t }); // 질문과 답변을 함께 저장
+                    userChoices.push({ q: data.q, a: ans.t });
                     currentIdx++; render(); 
                 };
                 document.getElementById("answer-box").appendChild(btn);
@@ -329,7 +372,7 @@
         const scanTexts = ["진단이 끝났습니다...", "이제 당신의 파동을 감지하겠습니다.", "화면의 원 위에 손가락을 대고...", "마음을 차분히 가라앉히세요."];
         let sIdx = 0;
         const showScanIntro = () => {
-            if(sIdx < scanTexts.length) { waveMsg.innerText = scanTexts[sIdx]; sIdx++; setTimeout(showScanIntro, 1200); }
+            if(sIdx < scanTexts.length) { waveMsg.innerText = scanTexts[sIdx]; sIdx++; setTimeout(showScanIntro, 1500); }
             else { waveMsg.innerHTML = "당신의 파동을 전달해 주세요...<br>(원을 꾹 누르세요)"; trigger.classList.remove("hidden"); trigger.classList.add("anim-pulse"); setupWaveEvent(); }
         };
         showScanIntro();
@@ -337,10 +380,11 @@
         function setupWaveEvent() {
             let pressTimer = null, progress = 0;
             const onStart = (e) => {
+                e.stopPropagation();
                 if (e.cancelable) e.preventDefault(); if (pressTimer) return;
                 pressTimer = setInterval(() => {
                     progress += 2.5; fill.style.width = progress + "%"; fill.style.height = progress + "%";
-                    if (navigator.vibrate) navigator.vibrate(10);
+                    if (navigator.vibrate) navigator.vibrate(15);
                     if (progress >= 100) { clearInterval(pressTimer); completeScan(); }
                 }, 35);
             };
@@ -349,7 +393,7 @@
             function completeScan() {
                 trigger.onpointerdown = null; trigger.classList.remove("anim-pulse");
                 waveMsg.innerHTML = `<span style="color:var(--wave-color)">파동을 수신했습니다!</span><br>당신의 파동은 ${WAVE_COLORS[finalNature].name}입니다.`;
-                setTimeout(() => { waveLayer.classList.add("hidden"); document.getElementById("game-container").classList.remove("hidden"); showResult(); }, 2000);
+                setTimeout(() => { waveLayer.classList.add("hidden"); document.getElementById("game-container").classList.remove("hidden"); showResult(); }, 2500);
             }
         }
     }
@@ -358,8 +402,6 @@
         document.getElementById("ui-header").classList.add("hidden");
         const natureName = KOREAN_TYPE_MAP[finalNature], resultName = POKEMON_MAP[userGender][finalNature], pokeId = ID_MAP[resultName];
         document.getElementById("answer-box").innerHTML = "";
-        
-        // 사용자가 한 대답 중 랜덤하게 2개를 골라 구체적으로 인용
         const sampled = [...userChoices].sort(() => 0.5 - Math.random()).slice(0, 2);
         
         typeWriter(`...너의 선택들을 곰곰이 지켜보았단다.`, "text-display", () => {
@@ -374,19 +416,32 @@
                             그걸 보니 너는 아무래도...<br>[${natureName}] 성격인 거 같아.
                         </div>
                         <div style="color:var(--wave-color); font-weight:bold; margin-top:10px;">그런 [${natureName}] 성격인 너는...</div>
-                        <div style="font-size:1.8rem; border-bottom:2px solid #fff; margin-bottom:15px; padding-bottom:5px;">${resultName}!</div>
+                        <div style="font-size:2rem; border-bottom:3px solid #fff; margin-bottom:15px; padding-bottom:5px;">${resultName}!</div>
                         <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png" alt="result">
                         <button class="btn btn-footer" onclick="location.reload()">다시 하기</button>
-                        <button class="btn btn-footer" style="background:rgba(56,248,56,0.1); border-color:var(--wave-color);" onclick="copyResult('${natureName}', '${resultName}')">결과 복사하기</button>
+                        <button class="btn btn-footer" style="background:rgba(56,248,56,0.15); border-color:var(--wave-color);" onclick="shareResult('${natureName}', '${resultName}')">결과 공유하기</button>
                     </div>`;
             }, 1000);
         });
     }
 
-    function copyResult(nature, poke) {
-        const text = `[포켓몬 성격 테스트]\n나의 성격: ${nature}\n닮은 포켓몬: ${poke}\n테스트 하기: ${window.location.href}`;
-        navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
+    async function shareResult(nature, poke) {
+        const text = `[포켓몬 성격 테스트]\n나의 성격: ${nature}\n닮은 포켓몬: ${poke}\n당신은 어떤 포켓몬이 될까요?`;
+        const url = window.location.href;
+        if (navigator.share) {
+            try { await navigator.share({ title: '포켓몬 성격 테스트', text: text, url: url }); } catch (err) { }
+        } else {
+            navigator.clipboard.writeText(text + "\n" + url).then(() => alert("결과가 복사되었습니다!"));
+        }
     }
+
+    function toggleMute() {
+        if (!player) return;
+        const icon = document.getElementById("mute-icon");
+        if (player.isMuted()) { player.unMute(); icon.innerText = "🔊"; }
+        else { player.mute(); icon.innerText = "🔇"; }
+    }
+    document.getElementById('volume-slider').oninput = (e) => { if (player) player.setVolume(e.target.value); };
 
     window.onload = () => typeWriter("... (아래 버튼을 눌러 시작하세요)", "intro-text");
 </script>
