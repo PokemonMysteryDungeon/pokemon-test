@@ -3,101 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="나와 닮은 포켓몬은 누구일까? 포켓몬 불가사의 던전 성격 테스트">
-    <title>포켓몬 성격 테스트 | PMD Personality Test</title>
-    <!-- 폰트 우선 순위 로드 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>포켓몬 성격 테스트 | 불가사의 던전</title>
     <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-neutral: #ffffff;
-            --bg-dot: #e5e7eb;
+            --bg-neutral: #fdfdfd;
+            --bg-dot: #e2e8f0;
             --window-bg: #1a202c;
-            --border-green: #48bb78;
-            --text-white: #f7fafc;
+            --border-green: #38f838;
+            --text-white: #ffffff;
         }
 
-        /* 기본 초기화 */
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; font-smooth: never; -webkit-font-smoothing: none; }
+        
         body {
-            font-family: 'DungGeunMo', -apple-system, sans-serif;
+            font-family: 'DungGeunMo', monospace;
             margin: 0; padding: 0;
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh;
             background-color: var(--bg-neutral);
             background-image: radial-gradient(var(--bg-dot) 1px, transparent 1px);
             background-size: 20px 20px;
-            color: #2d3748;
-            overflow-x: hidden;
-            touch-action: manipulation;
+            overflow: hidden;
         }
 
         #game-container {
             width: 90%;
-            max-width: 450px;
+            max-width: 480px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            opacity: 0; /* 로딩 전 깜빡임 방지 */
-            animation: fadeIn 0.5s forwards;
+            gap: 15px;
         }
-
-        @keyframes fadeIn { to { opacity: 1; } }
 
         .window {
             background: var(--window-bg);
             border: 4px solid var(--border-green);
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), inset 0 0 0 2px #000;
+            border-radius: 4px;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.1), inset 0 0 0 2px #000;
             color: var(--text-white);
             padding: 20px;
+            position: relative;
         }
 
-        /* 진행 바 */
-        .status-bar {
-            display: flex; justify-content: space-between;
-            font-size: 0.85rem; color: #718096; margin-bottom: 5px;
-        }
-        .progress-bar { height: 6px; background: #edf2f7; border-radius: 3px; overflow: hidden; }
+        /* 상태바 */
+        .status-bar { display: flex; justify-content: space-between; font-size: 16px; color: #64748b; margin-bottom: 5px; }
+        .progress-bar { height: 8px; background: #e2e8f0; border: 1px solid #94a3b8; }
         #progress-fill { height: 100%; background: var(--border-green); width: 0%; transition: width 0.3s ease; }
 
-        /* 대화창 영역 */
+        /* 대화창 */
         #question-box {
-            min-height: 130px; font-size: 1.15rem; line-height: 1.6;
+            min-height: 140px;
+            font-size: 19px;
+            line-height: 1.6;
             display: flex; align-items: center; justify-content: center;
             text-align: center; word-break: keep-all;
         }
 
-        /* 버튼 영역 */
-        #answer-box { display: flex; flex-direction: column; gap: 8px; }
+        /* 답변창 */
+        #answer-box { display: flex; flex-direction: column; gap: 8px; min-height: 150px; }
+
         .btn {
             background: transparent; border: 1px solid transparent;
             color: var(--text-white); font-family: inherit;
-            font-size: 1.05rem; text-align: left;
+            font-size: 18px; text-align: left;
             padding: 12px 12px 12px 35px; cursor: pointer;
-            position: relative; border-radius: 8px;
-            transition: background 0.2s, border-color 0.2s;
+            position: relative; border-radius: 4px;
         }
         .btn:active, .btn:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--border-green); }
-        .btn:active::before, .btn:hover::before { content: '▶'; position: absolute; left: 12px; color: var(--border-green); }
+        .btn:active::before, .btn:hover::before { content: '▶'; position: absolute; left: 10px; }
 
-        /* 컨트롤러 */
-        .controls {
-            display: flex; justify-content: center; align-items: center;
-            gap: 12px; margin-top: 10px; font-size: 0.85rem; color: #a0aec0;
+        /* 오라 감지 연출 */
+        #aura-sensor {
+            width: 150px; height: 150px; border-radius: 50%;
+            background: radial-gradient(circle, #38f838 0%, transparent 70%);
+            margin: 20px auto;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 14px;
         }
-        input[type=range] { accent-color: var(--border-green); width: 100px; cursor: pointer; }
+        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.6; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.6; } }
 
-        /* 결과창 중앙 정렬 핵심 레이아웃 */
-        .result-layout {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; width: 100%; text-align: center;
-        }
-        #pokemon-img { width: 160px; height: 160px; margin: 15px 0; object-fit: contain; }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 15px; font-size: 14px; color: #94a3b8; }
+        input[type=range] { accent-color: var(--border-green); width: 100px; }
+
+        .result-layout { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #pokemon-img { width: 160px; height: 160px; margin: 10px 0; object-fit: contain; image-rendering: pixelated; }
+
         .hidden { display: none !important; }
-
-        /* 사운드 플레이어 가시성 제거 */
         #player { position: fixed; bottom: 0; right: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
     </style>
 </head>
@@ -108,173 +101,213 @@
 <div id="game-container">
     <div id="ui-header">
         <div class="status-bar">
-            <span id="step-name">성격 진단</span>
-            <span id="step-count">0 / 20</span>
+            <span id="step-name">WELCOME</span>
+            <span id="step-count">...</span>
         </div>
         <div class="progress-bar"><div id="progress-fill"></div></div>
     </div>
 
     <div id="question-box" class="window">
-        <div id="text-display">탐험을 시작하기 전...<br>당신의 성별을 알려주세요.</div>
+        <div id="text-display">포켓몬의 세계에 오신 것을 환영합니다!</div>
     </div>
 
     <div id="answer-box" class="window">
-        <!-- JS 렌더링 -->
+        <!-- 초기 버튼 -->
+        <button class="btn" onclick="startAuraScan()">▶ 모험을 시작한다</button>
     </div>
 
     <div class="controls">
-        <span>BGM 🔈</span>
+        <span>BGM</span>
         <input type="range" id="volume-slider" min="0" max="100" value="30">
-        <span>🔊</span>
     </div>
 </div>
 
 <script>
-    // 1. 질문 데이터 (총 24개)
+    // 64개 전체 질문 데이터
     const ALL_QUESTIONS = [
-        { q: "휴일인데 아무도 놀아 주지 않는다... 그럼 당신은?", a: [{t: "여행을 떠난다", s: {Jolly: 4}}, {t: "멍하게 있는다", s: {Relaxed: 4}}, {t: "집에 박혀있는다", s: {Lonely: 4}}] },
-        { q: "비밀을 무심코 누설해버린 적이 있는가?", a: [{t: "있다", s: {Rash: 4}}, {t: "없다", s: {Hardy: 4}}] },
-        { q: "모르는 것은 모른다고 솔직하게 말하나?", a: [{t: "말한다", s: {Docile: 4}}, {t: "잘 말하지 못한다", s: {Timid: 4}}] },
-        { q: "매일 운동하기! 계속할 수 있을까?", a: [{t: "당연하지", s: {Hardy: 4}}, {t: "작심삼일이다", s: {Quirky: 4}}] },
-        { q: "기쁜 일이 있으면 나도 모르게 춤이 나오나?", a: [{t: "예", s: {Jolly: 4}}, {t: "아니오", s: {Quiet: 4}}] },
-        { q: "자주 넘어지거나 다치는 편인가?", a: [{t: "그렇다", s: {Rash: 4}}, {t: "전혀", s: {Calm: 4}}] },
-        { q: "TV 채널을 아주 자주 바꾸는 편인가?", a: [{t: "그렇다", s: {Hasty: 4}}, {t: "아니오", s: {Calm: 4}}] },
-        { q: "도시와 시골 중 어느 쪽이 취향인가?", a: [{t: "화려한 도시", s: {Sassy: 4}}, {t: "조용한 시골", s: {Calm: 4}}] },
-        { q: "주목받는 자리에 서는 것을 즐기나?", a: [{t: "즐긴다", s: {Sassy: 4}}, {t: "피하고 싶다", s: {Lonely: 4}}] },
-        { q: "계획을 세우고 그대로 실천하는 편인가?", a: [{t: "예", s: {Hardy: 4}}, {t: "아니오", s: {Quirky: 4}}] },
-        { q: "거짓말도 선의라면 필요하다고 생각하나?", a: [{t: "예", s: {Quiet: 4}}, {t: "아니오", s: {Brave: 4}}] },
-        { q: "지하실에서 수상한 소리가 들리면?", a: [{t: "가본다", s: {Brave: 4}}, {t: "도망친다", s: {Timid: 4}}] },
-        { q: "약속 시간에 늦는 경우가 잦은가?", a: [{t: "그렇다", s: {Rash: 4}}, {t: "절대 없다", s: {Hardy: 4}}] },
-        { q: "친구가 맛있는 것을 혼자 다 먹어버렸다!", a: [{t: "화낸다", s: {Jolly: 4}}, {t: "상관없다", s: {Calm: 4}}] },
-        { q: "나는 남들보다 특별한 천재라고 생각한 적 있나?", a: [{t: "있다", s: {Sassy: 4}}, {t: "전혀", s: {Hardy: 4}}] },
-        { q: "주위가 소란스러워도 집중을 잘 하나?", a: [{t: "그렇다", s: {Relaxed: 4}}, {t: "아니오", s: {Lonely: 4}}] },
-        { q: "유령선 안에 무엇이 있을 것 같나?", a: [{t: "보물!", s: {Jolly: 4}}, {t: "무서운 귀신", s: {Timid: 4}}] },
-        { q: "셔츠를 뒤집어 입고 나왔다는 말을 들으면?", a: [{t: "당황한다", s: {Docile: 4}}, {t: "웃어넘긴다", s: {Rash: 4}}] },
-        { q: "사놓고 쓰지 않는 물건이 많은가?", a: [{t: "많다", s: {Quirky: 4}}, {t: "없다", s: {Hardy: 4}}] },
-        { q: "가게 점원이 말을 걸어오면?", a: [{t: "대답한다", s: {Jolly: 4}}, {t: "부담스럽다", s: {Timid: 4}}] },
-        { q: "정의를 위해서라면 싸울 용기가 있나?", a: [{t: "있다", s: {Brave: 4}}, {t: "모르겠다", s: {Quiet: 4}}] },
-        { q: "처음 본 사람과 금방 친해지는가?", a: [{t: "그렇다", s: {Jolly: 4}}, {t: "시간이 걸린다", s: {Lonely: 4}}] },
-        { q: "복권을 사면 당첨될 것 같은 기분이 드나?", a: [{t: "항상 그렇다", s: {Naive: 4}}, {t: "기대 안 한다", s: {Quiet: 4}}] },
-        { q: "깜깜한 방에서 혼자 잘 수 있나?", a: [{t: "전혀 무섭지 않다", s: {Brave: 4}}, {t: "무섭다", s: {Timid: 4}}] }
+        { q: "휴일인데 아무도 놀아 주지 않는다... 그럼 당신은?", a: [{t: "여행을 떠난다", s: {Jolly: 4, Rash: 2}}, {t: "멍하게 있는다", s: {Relaxed: 4, Calm: 2}}, {t: "방구석에 박혀있는다", s: {Lonely: 4, Quiet: 2}}] },
+        { q: "비밀을 무심코 누설해버린 적이 있는가?", a: [{t: "있다", s: {Rash: 4, Lonely: 4}}, {t: "없다", s: {Hardy: 2}}] },
+        { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "절반은 쓰고 절반은 모은다", s: {Calm: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
+        { q: "매일 복근 운동 10회. 계속할 수 있을까?", a: [{t: "이 정도는 누워서 떡 먹기다", s: {Impish: 4, Sassy: 2}}, {t: "열심히 해 본다", s: {Hardy: 4}}, {t: "처음부터 할 생각이 없다", s: {Quirky: 4}}] },
+        { q: "모르는 것은 모른다고 솔직하게 말할 수 있는가?", a: [{t: "말할 수 있다", s: {Docile: 4, Bold: 2}}, {t: "잘 말하지 못한다", s: {Timid: 4, Lonely: 2}}] },
+        { q: "장래를 점쳐 보니 결과가 매우 나빴다. 너라면?", a: [{t: "매우 불안해진다", s: {Docile: 4, Timid: 2}}, {t: "잊어버린다", s: {Jolly: 4, Relaxed: 2, Bold: 2}}] },
+        { q: "굉장히 도움이 되는 정보를 얻었다! 너라면?", a: [{t: "비밀로 간직한다", s: {Bold: 4, Timid: 2}}, {t: "친구에게 가르쳐 준다", s: {Docile: 4, Rash: 4}}, {t: "다른 정보를 흘린다", s: {Impish: 4}}] },
+        { q: "풍선을 얼마만큼 불 수 있는가?", a: [{t: "터지기 직전까지 팽팽하게", s: {Brave: 4, Impish: 4}}, {t: "적당히 그만둔다", s: {Quiet: 2}}, {t: "무서워서 불지 못한다", s: {Timid: 4, Docile: 2}}] },
+        { q: "모두와 다른 의견이라도 확실히 말할 수 있는가?", a: [{t: "예", s: {Brave: 4, Bold: 2}}, {t: "아니오", s: {Lonely: 4, Timid: 2}}, {t: "상황에 따라 다르다", s: {Calm: 2, Quirky: 2}}] },
+        { q: "매우 좋아하는 사람에게 고백하고 싶다! 너라면?", a: [{t: "일단 함께 놀자고 한다", s: {Jolly: 4, Calm: 2}}, {t: "장난을 쳐서 관심을 끈다", s: {Lonely: 4, Naive: 2}}, {t: "큰 소리로 좋아해! 라고 외친다", s: {Brave: 4, Impish: 4, Bold: 2}}, {t: "두려워서 아무것도 못 한다", s: {Timid: 2}}] },
+        { q: "깜짝 인터뷰를 받았다! 너는 어떻게 하겠는가?", a: [{t: "부끄러워서 도망친다", s: {Timid: 4}}, {t: "당당하게 대답한다", s: {Brave: 4, Sassy: 4}}, {t: "OO야 보고 있니~?", s: {Naive: 4, Bold: 2}}] },
+        { q: "기쁜 일이 있으면 무심코 춤을 추는가?", a: [{t: "예", s: {Jolly: 4, Lonely: 2}}, {t: "아니오", s: {Calm: 2}}] },
+        { q: "저편에서 퍼레이드가 다가온다. 너는?", a: [{t: "옆에서 지켜본다", s: {Calm: 2}}, {t: "함께 행진한다", s: {Jolly: 4, Naive: 4}}, {t: "별로 신경 쓰지 않는다", s: {Sassy: 4, Lonely: 2}}] },
+        { q: "친구가 썰렁 개그를 말했다. 너는...", a: [{t: "꺄하하! 박장대소!", s: {Jolly: 4, Naive: 2}}, {t: "못 들은 척한다", s: {Impish: 2, Docile: 2}}, {t: "누가 어떻게 좀 해봐!", s: {Brave: 4}}] },
+        { q: "모르는 사람에게도 쉽게 말을 거는가?", a: [{t: "예", s: {Jolly: 4}}, {t: "아니오", s: {Bold: 4, Timid: 2, Docile: 2}}] },
+        { q: "자주 다치는 타입인가?", a: [{t: "예", s: {Impish: 4, Rash: 4}}, {t: "아니오", s: {Calm: 2}}] },
+        { q: "둥근 공을 보면 무심코...", a: [{t: "차고 싶어진다", s: {Hasty: 2, Sassy: 2}}, {t: "던지고 싶어진다", s: {Impish: 4}}, {t: "문지르고 싶어진다", s: {Lonely: 4}}] },
+        { q: "정글 탐험을 하고 싶은가?", a: [{t: "예", s: {Impish: 4, Naive: 2}}, {t: "아니오", s: {Quirky: 4, Timid: 2}}] },
+        { q: "지하실에서 비밀 계단을 발견했다! 너는...", a: [{t: "내려가 본다", s: {Impish: 4, Brave: 4, Rash: 2, Hasty: 2}}, {t: "일단 내버려 둔다", s: {Timid: 2}}] },
+        { q: "친구가 심하게 자빠졌다! 너는?", a: [{t: "바로 도와준다", s: {Brave: 4, Lonely: 2}}, {t: "나도 모르게 웃는다", s: {Naive: 4, Impish: 4, Rash: 2}}] },
+        { q: "진심으로 외계인을 불러내려고 한 적이 있는가?", a: [{t: "있다", s: {Naive: 4}}, {t: "없다", s: {Quiet: 2}}] },
+        { q: "농담으로 친구를 놀리다가 울려버린 적이 있는가?", a: [{t: "예", s: {Naive: 4}}, {t: "아니오", s: {Calm: 4}}] },
+        { q: "너의 뒤에 누군가 있다... (방금 뒤를 돌아봤나?)", a: [{t: "무서우니까 그만둬!", s: {Timid: 4}}, {t: "뭐야 속인 거군!", s: {Docile: 4}}, {t: "그 수법엔 안 속아!", s: {Sassy: 4, Lonely: 4}}, {t: "엥 뭐야?", s: {Relaxed: 4}}] },
+        { q: "가게 점원이 그저 그런 상품을 권해온다. 너는?", a: [{t: "단호하게 거절한다", s: {Brave: 2, Quiet: 2}}, {t: "부드럽게 거절한다", s: {Calm: 4, Lonely: 2}}, {t: "아무 말 못하고 사버린다", s: {Rash: 2, Timid: 2}}] },
+        { q: "서먹한 친구와 둘만 남게 되었다. 너는?", a: [{t: "쓸데없는 이야기를 한다", s: {Calm: 2}}, {t: "아무 말도 하지 않는다", s: {Quirky: 2}}, {t: "이유를 만들어 도망친다", s: {Timid: 4}}] },
+        { q: "누가 부른 것 같은데 아무도 없다. 무엇이라 생각하나?", a: [{t: "분명 기분 탓", s: {Relaxed: 4}}, {t: "누군가의 장난", s: {Naive: 4, Bold: 2}}, {t: "혹시... 귀신?", s: {Timid: 4}}] },
+        { q: "착각할 때가 자주 있는가?", a: [{t: "예", s: {Hasty: 4, Rash: 4}}, {t: "아니오", s: {Docile: 2, Quiet: 2}}] },
+        { q: "TV 채널을 자주 바꾸는는가?", a: [{t: "예", s: {Hasty: 4}}, {t: "아니오", s: {Calm: 2}}] },
+        { q: "싸고 질 좋은 상품을 발견했다!", a: [{t: "바로 사버린다!", s: {Hasty: 4}}, {t: "정말 필요한지 생각한다", s: {Quiet: 2}}, {t: "가격을 더 깎는다", s: {Bold: 4}}] },
+        { q: "소풍 과자가 너무 먹고 싶다!", a: [{t: "조금만 먹는다", s: {Hasty: 4}}, {t: "꾹 참는다", s: {Hardy: 4}}, {t: "정신차려보니 다 먹었다", s: {Rash: 4}}] },
+        { q: "잘난 체 하는 사람을 보면 반발심이 생기나?", a: [{t: "예", s: {Sassy: 4}}, {t: "아니오", s: {Calm: 2}}] },
+        { q: "항상 남보다 앞서가고 싶은가?", a: [{t: "예", s: {Sassy: 4, Lonely: 2}}, {t: "아니오", s: {Calm: 4, Quirky: 2}}] },
+        { q: "나는 혹시 천재? 라고 생각한 적이 있다.", a: [{t: "예", s: {Sassy: 4, Naive: 2, Jolly: 2}}, {t: "아니오", s: {Hardy: 2}}] },
+        { q: "손윗사람에게 의견을 확실히 말하나?", a: [{t: "예", s: {Sassy: 4, Brave: 4, Bold: 2}}, {t: "아니오", s: {Timid: 2}}] },
+        { q: "도시와 시골 중 어느 쪽이 좋은가?", a: [{t: "도시", s: {Lonely: 4, Sassy: 2}}, {t: "시골", s: {Calm: 4}}, {t: "어느 쪽이든 좋다", s: {Quirky: 4}}] },
+        { q: "남은 만두 1개를 친구가 먹어버렸다!", a: [{t: "뭐 괜찮아", s: {Calm: 4}}, {t: "분노 폭발!", s: {Relaxed: 4, Jolly: 4}}, {t: "슬퍼서 운다", s: {Lonely: 4}}] },
+        { q: "도미노를 거의 다 쌓았는데 쓰러뜨렸다!", a: [{t: "충격으로 멍해진다", s: {Hardy: 4}}, {t: "분노 폭발!", s: {Docile: 4}}, {t: "다시 쌓기 시작한다", s: {Calm: 4, Bold: 4}}] },
+        { q: "주위가 소란스러워도 신경 쓰이지 않나?", a: [{t: "예", s: {Bold: 4, Relaxed: 2}}, {t: "아니오", s: {Lonely: 4, Hasty: 2}}] },
+        { q: "배부른데 좋아하는 디저트가 나왔다!", a: [{t: "무리해서 먹는다", s: {Hasty: 4, Rash: 2}}, {t: "그만둔다", s: {Hardy: 2}}, {t: "디저트 배는 따로 있다!", s: {Bold: 4, Jolly: 4, Relaxed: 2}}] },
+        { q: "내일은 중요한 시험이다!", a: [{t: "밤새워 공부한다", s: {Hardy: 4}}, {t: "어떻게든 되겠지", s: {Relaxed: 4}}, {t: "왠지 열이 나는데?", s: {Naive: 4}}] },
+        { q: "레스토랑에서 갑자기 사람들이 사라졌다!", a: [{t: "점원을 찾는다", s: {Lonely: 4, Docile: 4}}, {t: "계속 먹는다", s: {Jolly: 4, Relaxed: 4}}, {t: "남은 음식을 먹는다", s: {Bold: 4}}] },
+        { q: "정신 차려보니 콧노래를 부를 때가 있나?", a: [{t: "예", s: {Relaxed: 4}}, {t: "아니오", s: {Quiet: 2}}] },
+        { q: "전화가 왔다! 너는?", a: [{t: "서둘러 받는다", s: {Hasty: 4, Lonely: 4}}, {t: "조금 기다렸다 받는다", s: {Quiet: 2}}, {t: "일부러 안 받는다", s: {Timid: 2}}] },
+        { q: "친구가 즐겁게 대화하고 있다. 너는?", a: [{t: "궁금해서 다가간다", s: {Naive: 4}}, {t: "신경 쓰지 않는다", s: {Lonely: 4}}, {t: "귀를 기울인다", s: {Timid: 2}}] },
+        { q: "주목받는 것을 좋아하는가?", a: [{t: "예", s: {Lonely: 4, Sassy: 4}}, {t: "아니오", s: {Relaxed: 2}}] },
+        { q: "아무것도 없는 방에서 기다려야 한다면?", a: [{t: "얌전히 기다린다", s: {Docile: 4}}, {t: "뭔가 없는지 찾는다", s: {Naive: 4}}, {t: "무심코 나가버린다", s: {Rash: 4}}, {t: "구석에 웅크려 앉는다", s: {Lonely: 4}}] },
+        { q: "사놓고 안 쓰는 물건이 많은가?", a: [{t: "예", s: {Quirky: 4, Rash: 2, Hasty: 2}}, {t: "아니오", s: {Quiet: 2}}] },
+        { q: "꾸준히 하는 취미가 있는가?", a: [{t: "있다", s: {Hardy: 4}}, {t: "없다", s: {Quirky: 4, Hasty: 2}}] },
+        { q: "약속을 직전에 취소한 적이 있나?", a: [{t: "있다", s: {Quirky: 4, Rash: 4}}, {t: "없다", s: {Calm: 2}}] },
+        { q: "계획대로 행동하는가?", a: [{t: "그런 편이다", s: {Hardy: 4}}, {t: "잘 안 된다", s: {Quirky: 4, Rash: 2}}, {t: "계획은 안 세운다", s: {Relaxed: 4}}] },
+        { q: "때로는 거짓말도 필요하다고 생각하나?", a: [{t: "예", s: {Quiet: 4, Bold: 4}}, {t: "아니오", s: {Brave: 4}}, {t: "모른다", s: {Docile: 4}}] },
+        { q: "유령선 안에는 무엇이 있을까?", a: [{t: "보물!", s: {Naive: 4, Jolly: 2}}, {t: "귀신 가득", s: {Timid: 2}}, {t: "환상일 뿐", s: {Quiet: 4}}] },
+        { q: "이기기 위해선 무슨 짓이든 해도 되나?", a: [{t: "그렇다", s: {Quiet: 4, Sassy: 4}}, {t: "아니다", s: {Brave: 4}}] },
+        { q: "친구가 울고 있다. 이유는?", a: [{t: "누가 괴롭혔다", s: {Hasty: 4}}, {t: "넘어졌다", s: {Quiet: 4}}, {t: "나 때문인가?", s: {Timid: 2}}] },
+        { q: "문단속을 잊고 외출한 적이 있나?", a: [{t: "있다", s: {Rash: 4, Bold: 2}}, {t: "없다", s: {Quiet: 2}}] },
+        { q: "친구 집에서 저녁을 먹는다!", a: [{t: "마구 먹는다", s: {Impish: 4, Naive: 4}}, {t: "주저하며 먹는다", s: {Hardy: 2}}, {t: "남은 거 싸달라고 한다", s: {Bold: 4}}] },
+        { q: "무거운 짐이 있다면?", a: [{t: "혼자 옮긴다", s: {Hardy: 4, Brave: 2}}, {t: "도움을 받는다", s: {Docile: 2}}, {t: "남에게 시킨다", s: {Bold: 4, Sassy: 2}}] },
+        { q: "공동묘지에 젖은 여자가 서 있다!", a: [{t: "도망친다", s: {Timid: 2}}, {t: "변장이지?", s: {Naive: 4, Sassy: 2}}, {t: "죽은 척한다", s: {Rash: 4}}] },
+        { q: "하루 지난 케이크가 있다!", a: [{t: "그냥 먹는다", s: {Brave: 4, Relaxed: 2}}, {t: "고민하다 안 먹는다", s: {Timid: 2}}, {t: "남 먹여본다", s: {Bold: 4}}] },
+        { q: "셔츠를 뒤집어 입었다는 소리를 들었다!", a: [{t: "동요한다", s: {Docile: 4}}, {t: "크게 웃는다", s: {Rash: 4}}, {t: "얼버무린다", s: {Jolly: 4}}] },
+        { q: "누가 물을 끼얹었다!", a: [{t: "화낸다", s: {Hasty: 4}}, {t: "운다", s: {Lonely: 4}}, {t: "물싸움이다!", s: {Jolly: 4, Naive: 4, Impish: 4}}] },
+        { q: "연극에서 맡고 싶은 역할은?", a: [{t: "주연", s: {Bold: 4}}, {t: "조연", s: {Jolly: 4}}, {t: "단역", s: {Quirky: 4}}] },
+        { q: "수업 중 화장실에 가고 싶다면?", a: [{t: "손들고 간다", s: {Brave: 4, Bold: 4}}, {t: "몰래 간다", s: {Hasty: 2}}, {t: "필사적으로 참는다", s: {Timid: 2}}] },
+        { q: "마라톤 골인 직전! 너무 괴롭다면?", a: [{t: "끝까지 완주", s: {Hardy: 4, Brave: 2}}, {t: "포기한다", s: {Quirky: 4}}, {t: "지름길로 간다", s: {Bold: 4, Rash: 2}}] },
+        { q: "길에서 좋은 냄새가 난다!", a: [{t: "상상한다", s: {Docile: 4}}, {t: "냄새를 따라간다", s: {Naive: 4, Rash: 2}}, {t: "배가 고파진다", s: {Impish: 4}}] }
     ];
 
-    // 2. 성격 & 포켓몬 매핑
-    const KOREAN_TYPE_MAP = {
-        Hardy: "노력하는", Docile: "온순한", Brave: "용감한", Jolly: "명랑한", Impish: "장난꾸러기", 
-        Naive: "천진난만한", Bold: "대담한", Timid: "겁쟁이", Hasty: "성급한", Sassy: "건방진", 
-        Quiet: "냉정한", Relaxed: "무사태평", Rash: "덜렁거리는", Quirky: "변덕스러운", 
-        Lonely: "외로움타는", Calm: "차분한"
-    };
-
-    const POKEMON_MAP = {
-        male: { Hardy: "아차모", Docile: "파이리", Brave: "피카츄", Jolly: "리아코", Impish: "팽도리", Naive: "불꽃숭이", Bold: "모부기", Timid: "브케인", Hasty: "에나비", Sassy: "냐옹", Quiet: "나무지기", Relaxed: "먹고자", Rash: "물짱이", Quirky: "꼬부기", Lonely: "이상해씨", Calm: "치코리타" },
-        female: { Hardy: "나무지기", Docile: "이상해씨", Brave: "파이리", Jolly: "먹고자", Impish: "불꽃숭이", Naive: "에나비", Bold: "꼬부기", Timid: "모부기", Hasty: "피카츄", Sassy: "리아코", Quiet: "치코리타", Relaxed: "식스테일", Rash: "아차모", Quirky: "팽도리", Lonely: "물짱이", Calm: "브케인" }
-    };
-
+    const AURA_COLORS = { Hardy: "블루", Docile: "화이트", Brave: "레드", Jolly: "옐로", Impish: "그린", Naive: "오렌지", Bold: "골드", Timid: "라이트그린", Hasty: "스카이블루", Sassy: "아쿠아", Quiet: "퍼플", Relaxed: "브라운", Rash: "그레이", Quirky: "실버", Lonely: "핑크", Calm: "블랙" };
+    const KOREAN_TYPE_MAP = { Hardy: "노력하는", Docile: "온순한", Brave: "용감한", Jolly: "명랑한", Impish: "장난꾸러기", Naive: "천진난만한", Bold: "대담한", Timid: "겁쟁이", Hasty: "성급한", Sassy: "건방진", Quiet: "냉정한", Relaxed: "무사태평", Rash: "덜렁거리는", Quirky: "변덕스러운", Lonely: "외로움타는", Calm: "차분한" };
+    const POKEMON_MAP = { male: { Hardy: "아차모", Docile: "파이리", Brave: "피카츄", Jolly: "리아코", Impish: "팽도리", Naive: "불꽃숭이", Bold: "모부기", Timid: "브케인", Hasty: "에나비", Sassy: "냐옹", Quiet: "나무지기", Relaxed: "먹고자", Rash: "물짱이", Quirky: "꼬부기", Lonely: "이상해씨", Calm: "치코리타" }, female: { Hardy: "나무지기", Docile: "이상해씨", Brave: "파이리", Jolly: "먹고자", Impish: "불꽃숭이", Naive: "에나비", Bold: "꼬부기", Timid: "모부기", Hasty: "피카츄", Sassy: "리아코", Quiet: "치코리타", Relaxed: "식스테일", Rash: "아차모", Quirky: "팽도리", Lonely: "물짱이", Calm: "브케인" } };
     const ID_MAP = { "아차모": 255, "파이리": 4, "피카츄": 25, "리아코": 158, "팽도리": 393, "불꽃숭이": 390, "모부기": 387, "브케인": 155, "에나비": 300, "냐옹": 52, "나무지기": 252, "먹고자": 446, "물짱이": 258, "꼬부기": 7, "이상해씨": 1, "치코리타": 152, "식스테일": 37 };
 
-    // 3. 상태 관리
-    let userGender = '';
-    let currentIdx = 0;
-    let scores = {};
-    let testPool = [];
-    const MAX_QUESTIONS = 20;
+    let userGender = '', currentIdx = 0, scores = {}, testPool = [], isTyping = false;
 
-    // 4. 유튜브 플레이어 제어 (사파리 대응 최적화)
-    let player;
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('player', {
-            videoId: 'ehI75lWfXhw',
-            playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'controls': 0, 'playsinline': 1 },
-            events: { 'onReady': onPlayerReady }
+    function typeWriter(text, elementId, callback) {
+        let i = 0;
+        isTyping = true;
+        const el = document.getElementById(elementId);
+        el.innerText = "";
+        const timer = setInterval(() => {
+            if (i < text.length) {
+                el.append(text.charAt(i));
+                i++;
+            } else {
+                clearInterval(timer);
+                isTyping = false;
+                if (callback) callback();
+            }
+        }, 50);
+    }
+
+    function startAuraScan() {
+        if(player && player.playVideo) { player.playVideo(); player.unMute(); }
+        document.getElementById("answer-box").classList.add("hidden");
+        typeWriter("잠시 동안 화면에 손가락을 가만히 대주세요... 당신의 오라를 감지합니다.", "text-display", () => {
+            const sensor = document.createElement("div");
+            sensor.id = "aura-sensor";
+            sensor.innerText = "TOUCH";
+            sensor.onmousedown = sensor.ontouchstart = () => {
+                sensor.style.background = "radial-gradient(circle, #fff 0%, #38f838 100%)";
+                setTimeout(() => { 
+                    sensor.remove(); 
+                    askGender(); 
+                }, 2000);
+            };
+            document.getElementById("game-container").insertBefore(sensor, document.getElementById("answer-box"));
         });
     }
 
-    function onPlayerReady(event) {
-        const slider = document.getElementById('volume-slider');
-        player.setVolume(slider.value);
-        slider.oninput = (e) => player.setVolume(e.target.value);
-    }
-
-    // 5. 게임 로직
-    function init() {
-        const ansBox = document.getElementById("answer-box");
-        ansBox.innerHTML = `
-            <button class="btn" onclick="startTest('male')">남자 아이</button>
-            <button class="btn" onclick="startTest('female')">여자 아이</button>
-        `;
+    function askGender() {
+        typeWriter("감지가 끝났습니다... 모험을 떠나기 전, 당신의 성별을 알려주세요.", "text-display", () => {
+            const ansBox = document.getElementById("answer-box");
+            ansBox.classList.remove("hidden");
+            ansBox.innerHTML = `
+                <button class="btn" onclick="startTest('male')">▶ 남자 아이</button>
+                <button class="btn" onclick="startTest('female')">▶ 여자 아이</button>
+            `;
+        });
     }
 
     function startTest(gender) {
-        // 유저 클릭 시 사파리 오디오 락 해제
-        if(player && player.playVideo) {
-            player.playVideo();
-            player.unMute();
-        }
         userGender = gender;
         Object.keys(KOREAN_TYPE_MAP).forEach(k => scores[k] = 0);
-        testPool = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, MAX_QUESTIONS);
+        testPool = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 20);
+        document.getElementById("step-name").innerText = "TESTING";
         render();
     }
 
     function render() {
-        if (currentIdx >= testPool.length) {
-            showResult();
-            return;
-        }
-        
+        if (currentIdx >= testPool.length) { showResult(); return; }
         const data = testPool[currentIdx];
-        document.getElementById("text-display").innerText = data.q;
-        document.getElementById("step-count").innerText = `${currentIdx + 1} / ${MAX_QUESTIONS}`;
-        document.getElementById("progress-fill").style.width = `${((currentIdx + 1) / MAX_QUESTIONS) * 100}%`;
-
-        const ansBox = document.getElementById("answer-box");
-        ansBox.innerHTML = "";
-        data.a.forEach(ans => {
-            const btn = document.createElement("button");
-            btn.className = "btn";
-            btn.innerText = ans.t;
-            btn.onclick = () => {
-                for (let s in ans.s) scores[s] = (scores[s] || 0) + ans.s[s];
-                currentIdx++;
-                render();
-            };
-            ansBox.appendChild(btn);
+        document.getElementById("answer-box").innerHTML = "";
+        typeWriter(data.q, "text-display", () => {
+            document.getElementById("step-count").innerText = `${currentIdx + 1} / 20`;
+            document.getElementById("progress-fill").style.width = `${((currentIdx + 1) / 20) * 100}%`;
+            data.a.forEach(ans => {
+                const btn = document.createElement("button");
+                btn.className = "btn";
+                btn.innerText = "▶ " + ans.t;
+                btn.onclick = () => {
+                    if(isTyping) return;
+                    for (let s in ans.s) scores[s] = (scores[s] || 0) + ans.s[s];
+                    currentIdx++;
+                    render();
+                };
+                document.getElementById("answer-box").appendChild(btn);
+            });
         });
     }
 
     function showResult() {
         document.getElementById("answer-box").classList.add("hidden");
-        document.getElementById("step-name").innerText = "분석 완료";
-        
+        document.getElementById("step-name").innerText = "FINISH";
         const maxScore = Math.max(...Object.values(scores));
         const winners = Object.keys(scores).filter(k => scores[k] === maxScore);
         const topKey = winners[Math.floor(Math.random() * winners.length)];
+        const auraColor = AURA_COLORS[topKey];
         
-        const typeKR = KOREAN_TYPE_MAP[topKey];
-        const name = POKEMON_MAP[userGender][topKey] || "피카츄";
-        const pokeId = ID_MAP[name] || 25;
-
-        const qBox = document.getElementById("question-box");
-        // onerror 핸들러로 이미지 로드 실패 시 대체 처리
-        qBox.innerHTML = `
-            <div class="result-layout">
-                <p>당신의 오라 색깔로 보아... <br><strong>[${typeKR}]</strong> 성격이군요!</p>
-                <img id="pokemon-img" 
-                     src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png"
-                     onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'; this.onerror=null;">
-                <p style="font-size:1.4rem; color:var(--border-green);">당신은 <strong>${name}</strong>입니다!</p>
-                <button class="btn" style="text-align:center; padding-left:15px; margin-top:10px;" onclick="location.reload()">▶ 다시 하기</button>
-            </div>
-        `;
+        typeWriter(`당신으로부터 추출된 오라의 색은... [${auraColor}] 입니다!`, "text-display", () => {
+            setTimeout(() => {
+                typeWriter(`그 색으로 보아 당신은... [${KOREAN_TYPE_MAP[topKey]}] 성격이군요!`, "text-display", () => {
+                    setTimeout(() => {
+                        const name = POKEMON_MAP[userGender][topKey];
+                        const pokeId = ID_MAP[name];
+                        document.getElementById("question-box").innerHTML = `
+                            <div class="result-layout">
+                                <p>당신은 바로... <strong>${name}</strong>입니다!</p>
+                                <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png">
+                                <p style="font-size:14px; color:#48bb78;">자, 눈을 뜨면 당신의 모험이 시작될 거예요!</p>
+                                <button class="btn" style="color:#fff; border-color:#fff; margin-top:10px;" onclick="location.reload()">▶ 다시 하기</button>
+                            </div>`;
+                    }, 2000);
+                });
+            }, 1500);
+        });
     }
 
-    // 외부 API 로드
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
+    let player;
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', { videoId: 'ehI75lWfXhw', playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'controls': 0, 'playsinline': 1 }, events: { 'onReady': (e) => { e.target.setVolume(document.getElementById('volume-slider').value); document.getElementById('volume-slider').oninput = (v) => e.target.setVolume(v.target.value); } } });
+    }
+    const tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
     init();
 </script>
 </body>
