@@ -7,188 +7,96 @@
     <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        :root {
-            --window-bg: #1a202c;
-            --border-green: #38f838;
-            --wave-color: #38f838;
-            --text-white: #ffffff;
-            --bg-dark: #0a0e17;
-            --bg-grid: rgba(56, 248, 56, 0.05);
-            --accent-yellow: #f8f838;
-            --crt-overlay: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-        }
-
-        * { 
-            -webkit-tap-highlight-color: transparent; 
-            box-sizing: border-box; 
-            outline: none; 
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        body {
-            font-family: 'DungGeunMo', monospace;
-            margin: 0; padding: 0;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; min-height: 100dvh;
-            background-color: var(--bg-dark);
-            background-image: linear-gradient(var(--bg-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
-            background-size: 30px 30px;
-            color: var(--text-white);
-            overflow: hidden;
-            touch-action: pan-y;
-        }
-
-        /* CRT 효과 */
-        body::before {
-            content: " ";
-            display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
-            background: var(--crt-overlay);
-            z-index: 9999;
-            background-size: 100% 4px, 3px 100%;
-            pointer-events: none;
-        }
-
-        #game-container {
-            width: 95%; max-width: 480px;
-            display: flex; flex-direction: column;
-            gap: 15px; z-index: 10; padding: 20px;
-        }
-
-        .window {
-            background: var(--window-bg);
-            border: 4px solid var(--border-green);
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(56, 248, 56, 0.2);
-            padding: 20px;
-            position: relative;
-        }
-
-        #intro-layer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 1000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            padding: 20px; transition: opacity 0.5s ease-out;
-        }
-
-        #intro-text {
-            font-size: 1.25rem; line-height: 1.8; text-align: center;
-            word-break: keep-all; min-height: 120px; max-width: 80%;
-        }
-
-        .btn-base {
-            background: rgba(56, 248, 56, 0.1);
-            color: #fff; border: 4px solid var(--border-green);
-            padding: 16px; font-family: inherit; font-size: 1.1rem;
-            cursor: pointer; border-radius: 12px; transition: 0.1s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-
-        .btn-base:active {
-            background: var(--border-green);
-            color: #000; transform: scale(0.96);
-        }
-
-        .btn-choice {
-            background: rgba(255,255,255,0.05);
-            border: 2px solid #334155;
-            color: var(--text-white);
-            font-family: inherit; font-size: 1.05rem;
-            text-align: left; padding: 14px 15px 14px 45px;
-            cursor: pointer; position: relative; border-radius: 8px;
-            width: 100%; transition: 0.2s;
-        }
-
-        .btn-choice::before {
-            content: '▶'; position: absolute; left: 18px;
-            color: var(--border-green); font-size: 0.9rem;
-        }
-
-        .btn-choice:hover { border-color: var(--border-green); background: rgba(56, 248, 56, 0.1); }
-
+        /* [UI 복구] 첫 번째 버전의 CSS 테마 및 레이아웃 */
+        :root { --window-bg: #1a202c; --border-green: #38f838; --wave-color: #38f838; --text-white: #ffffff; --bg-dark: #0a0e17; --bg-grid: rgba(56, 248, 56, 0.05); --accent-yellow: #f8f838; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; -webkit-touch-callout: none; user-select: none; }
+        body { font-family: 'DungGeunMo', monospace; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh; background-color: var(--bg-dark); background-image: linear-gradient(var(--bg-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px); background-size: 30px 30px; color: var(--text-white); overflow: hidden; }
+        
+        #game-container { width: 95%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; z-index: 10; padding: 10px; }
+        .window { background: var(--window-bg); border: 4px solid var(--border-green); border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(56, 248, 56, 0.2); padding: 20px; position: relative; }
+        
+        #intro-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        #intro-text-box { min-height: 150px; display: flex; align-items: center; justify-content: center; width: 100%; }
+        #intro-text { font-size: 1.3rem; line-height: 1.8; text-align: center; word-break: keep-all; color: #fff; max-width: 85%; }
+        
+        .btn-center { margin: 20px auto 0; width: 80%; max-width: 250px; background: rgba(56, 248, 56, 0.1); color: #fff; border: 4px solid var(--border-green); padding: 16px; font-family: inherit; font-size: 1.2rem; cursor: pointer; border-radius: 12px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-center:active { background: var(--border-green); color: #000; transform: scale(0.95); }
+        
         .status-bar { display: flex; justify-content: space-between; color: var(--border-green); font-size: 14px; margin-bottom: 8px; font-weight: bold; }
-        .progress-bar { height: 10px; background: #1e293b; border-radius: 5px; overflow: hidden; }
-        #progress-fill { height: 100%; background: var(--border-green); width: 0%; transition: width 0.3s ease-out; }
-
-        .cursor::after { content: ' ▼'; animation: blink 0.8s infinite; color: var(--border-green); }
+        .progress-bar { height: 12px; background: #1e293b; border-radius: 6px; overflow: hidden; border: 1px solid #334155; }
+        #progress-fill { height: 100%; background: linear-gradient(90deg, #166534, var(--border-green)); width: 0%; transition: width 0.4s; }
+        
+        #question-box { min-height: 160px; font-size: 1.2rem; line-height: 1.7; display: flex; align-items: center; justify-content: center; text-align: center; word-break: keep-all; }
+        #answer-box { display: flex; flex-direction: column; gap: 12px; min-height: 100px; }
+        
+        .btn-choice { background: rgba(255,255,255,0.05); border: 2px solid #334155; color: var(--text-white); font-family: inherit; font-size: 1.1rem; text-align: left; padding: 14px 15px 14px 45px; cursor: pointer; position: relative; border-radius: 8px; transition: 0.2s; width: 100%; }
+        .btn-choice:hover { background: rgba(56, 248, 56, 0.1); border-color: var(--wave-color); }
+        .btn-choice::before { content: '▶'; position: absolute; left: 18px; color: var(--border-green); font-size: 0.9rem; }
+        
+        .cursor::after { content: ' ▼'; animation: blink 0.8s infinite; color: var(--border-green); vertical-align: middle; }
         @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
-
-        #wave-layer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 2000;
-            text-align: center; color: #fff;
-        }
-
-        .wave-bg-glow {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 100vw; height: 100vw;
-            background: radial-gradient(circle, var(--wave-color) 0%, transparent 70%);
-            opacity: 0.3; pointer-events: none;
-        }
-
-        .wave-circle {
-            width: 150px; height: 150px; border: 6px solid #fff;
-            border-radius: 50%; margin-top: 40px; position: relative;
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden; touch-action: none; cursor: pointer;
-            box-shadow: 0 0 30px rgba(255,255,255,0.2);
-        }
-
-        .wave-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: #fff; opacity: 0.7; }
-
-        .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .result-poke-name { font-size: 2.2rem; margin-bottom: 10px; color: var(--accent-yellow); text-shadow: 0 0 10px var(--wave-color); }
-        #pokemon-img { width: 200px; height: 200px; filter: drop-shadow(0 0 10px var(--wave-color)); margin: 10px 0; opacity: 0; transition: opacity 1s; }
-        .result-desc { font-size: 1rem; line-height: 1.7; color: #cbd5e1; text-align: center; margin-bottom: 20px; }
-
+        
+        #wave-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, var(--wave-color) 0%, #000 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; text-align: center; color: #fff; transition: opacity 1s ease; }
+        #wave-msg { font-size: 1.4rem; font-weight: bold; padding: 0 40px; line-height: 1.8; min-height: 120px; text-shadow: 2px 2px 10px #000; }
+        .wave-circle { width: 160px; height: 160px; border: 6px solid #fff; border-radius: 50%; margin-top: 50px; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; box-shadow: 0 0 40px rgba(255,255,255,0.5); cursor: pointer; touch-action: none; }
+        .wave-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: #fff; opacity: 0.6; pointer-events: none; }
+        
+        .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 1s; padding-bottom: 20px; }
+        .result-desc { font-size: 1.1rem; line-height: 1.8; margin: 20px 0; color: #cbd5e1; text-align: center; word-break: keep-all; }
+        #pokemon-img { width: 220px; height: 220px; margin: 15px 0; object-fit: contain; filter: drop-shadow(0 0 15px var(--wave-color)); opacity: 0; transition: opacity 0.8s; }
+        .result-nature-tag { color: var(--accent-yellow); font-weight: bold; margin-bottom: 5px; font-size: 1.3rem; }
+        .result-poke-name { font-size: 2.6rem; border-bottom: 3px solid var(--border-green); padding-bottom: 5px; margin-bottom: 15px; text-shadow: 0 0 10px var(--wave-color); }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .hidden { display: none !important; }
-        .fade-out { opacity: 0; pointer-events: none; }
+        .anim-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 20px #fff; } 50% { transform: scale(1.1); box-shadow: 0 0 50px #fff; } 100% { transform: scale(1); box-shadow: 0 0 20px #fff; } }
+        
+        #player { position: fixed; bottom: 0; right: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+        .audio-ctrl { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 20px; color: #94a3b8; font-size: 13px; }
     </style>
 </head>
-<body>
-    <div id="player"></div>
+<body id="main-body">
+<div id="player"></div>
 
-    <div id="intro-layer">
-        <div id="intro-text-box"><span id="intro-text"></span></div>
-        <button class="btn-base" id="intro-next-btn" style="width: 200px; margin-top: 30px;">
-            <span>▶</span> 다음 (Next)
-        </button>
+<!-- 인트로 레이어 (복구됨) -->
+<div id="intro-layer">
+    <div id="intro-text-box"><span id="intro-text"></span></div>
+    <button class="btn-center" id="intro-next-btn"><span>▶</span> 다음 (Next)</button>
+</div>
+
+<!-- 게임 컨테이너 (복구됨) -->
+<div id="game-container" class="hidden">
+    <div id="testing-ui">
+        <div class="status-bar"><span id="step-name">성격 진단 중...</span><span id="step-count">0 / 20</span></div>
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+        <div style="height:25px;"></div>
+        <div id="question-box" class="window"><div id="text-display"></div></div>
+        <div style="height:20px;"></div>
+        <div id="answer-box"></div>
     </div>
-
-    <div id="game-container" class="hidden">
-        <div id="testing-ui">
-            <div class="status-bar">
-                <span id="step-name">성격 진단 중...</span>
-                <span id="step-count">0 / 20</span>
-            </div>
-            <div class="progress-bar"><div id="progress-fill"></div></div>
-            <div style="height:30px;"></div>
-            <div id="question-box" class="window"><div id="text-display"></div></div>
-            <div style="height:20px;"></div>
-            <div id="answer-box" style="display: flex; flex-direction: column; gap: 10px;"></div>
-        </div>
-
-        <div id="result-ui" class="window hidden" style="max-height: 85vh; overflow-y: auto;">
-            <div id="result-display"></div>
-        </div>
-
-        <div style="display:flex; justify-content:center; align-items:center; gap:15px; margin-top:15px; opacity:0.6; font-size:12px;">
-            <span id="mute-btn" style="cursor:pointer; font-size:16px;">🔊</span>
-            <input type="range" id="volume-slider" min="0" max="100" value="30" style="width:60px; accent-color:var(--border-green);">
-        </div>
+    <div id="result-ui" class="window hidden" style="max-height: 85vh; overflow-y: auto;">
+        <div id="result-display"></div>
     </div>
-
-    <div id="wave-layer" class="hidden">
-        <div class="wave-bg-glow" id="wave-glow"></div>
-        <div id="wave-msg" style="padding: 0 40px; line-height: 1.8; font-size: 1.2rem; min-height: 80px; z-index:1;"></div>
-        <div class="wave-circle hidden" id="wave-trigger">
-            <div class="wave-fill" id="wave-fill"></div>
-            <span style="z-index:1; font-weight: bold; color:#000; letter-spacing: 2px; pointer-events: none;">PUSH</span>
-        </div>
+    <div class="audio-ctrl">
+        <span id="mute-btn" style="cursor:pointer; font-size:18px;">🔊</span>
+        <input type="range" id="volume-slider" min="0" max="100" value="30" style="accent-color:var(--border-green); width:80px;">
     </div>
+</div>
+
+<!-- 파동 스캔 레이어 (복구됨) -->
+<div id="wave-layer" class="hidden">
+    <div id="wave-msg"></div>
+    <div class="wave-circle hidden" id="wave-trigger">
+        <div class="wave-fill" id="wave-fill"></div>
+        <span style="z-index:1; font-weight: bold; color:#000; letter-spacing: 2px; pointer-events: none;">PUSH</span>
+    </div>
+</div>
 
 <script>
+    /**
+     * App Engine: [최적화 로직 적용]
+     */
     const App = {
         questions: [
             { q: "휴일인데 아무도 놀아 주지 않는다... 그럼 당신은?", a: [{t: "여행을 떠난다", s: {Jolly: 4, Rash: 2}}, {t: "멍하게 있는다", s: {Relaxed: 4, Calm: 2}}, {t: "방구석에 박혀있는다", s: {Lonely: 4, Quiet: 2}}] },
@@ -258,6 +166,7 @@
             { q: "길에서 좋은 냄새가 난다!", a: [{t: "상상한다", s: {Docile: 4}}, {t: "냄새를 따라간다", s: {Naive: 4, Rash: 2}}, {t: "배가 고파진다", s: {Impish: 4}}] }
         ],
         introTexts: ["어서 오너라!", "여기는 포켓몬들의 세계로\n통하는 입구다!", "이 문 너머에는 네가 상상하지 못한\n다양한 모험이 기다리고 있을 것이다!", "하지만 모험에 나서기 전에\n너에게 몇 가지 질문이 있다.", "솔직하게 대답해 주길 바란다.", "준비는 되었는가?", "그럼... 질문 시작하겠다!"],
+        
         natureMap: { Lonely: "고독한", Docile: "온순한", Quirky: "변덕스러운", Brave: "용감한", Sassy: "건방진", Calm: "차분한", Timid: "소심한", Jolly: "유쾌한", Quiet: "내성적", Hardy: "강건한", Rash: "무모한", Hasty: "조급한", Bold: "과감한", Naive: "순진한", Impish: "장난꾸러기", Relaxed: "느긋한" },
         pokemonMap: { 
             male: { Lonely: "이상해씨", Docile: "파이리", Quirky: "꼬부기", Brave: "피카츄", Sassy: "냐옹", Calm: "치코리타", Timid: "브케인", Jolly: "리아코", Quiet: "나무지기", Hardy: "아차모", Rash: "물짱이", Hasty: "에나비", Bold: "모부기", Naive: "불꽃숭이", Impish: "팽도리", Relaxed: "먹고자" }, 
@@ -266,63 +175,44 @@
         pokeIdMap: { "아차모": 255, "파이리": 4, "피카츄": 25, "리아코": 158, "팽도리": 393, "불꽃숭이": 390, "모부기": 387, "브케인": 155, "에나비": 300, "냐옹": 52, "나무지기": 252, "먹고자": 446, "물짱이": 258, "꼬부기": 7, "이상해씨": 1, "치코리타": 152, "식스테일": 37 },
         waveColors: { Hardy: "#ff4d4d", Brave: "#ff4d4d", Rash: "#ff4d4d", Jolly: "#ff80df", Naive: "#ff80df", Relaxed: "#33ccff", Quiet: "#33ccff", Calm: "#3366ff", Timid: "#ffa31a", Hasty: "#ffa31a", Sassy: "#cc66ff", Quirky: "#cc66ff", Bold: "#ffff33", Impish: "#ffff33", Docile: "#38f838", Lonely: "#38f838" },
 
-        state: { typingTimer: null, isTyping: false, introIdx: 0, currentIdx: 0, scores: {}, testPool: [], userChoices: [], userGender: 'male', finalNature: 'Hardy', player: null, isProcessing: false },
+        state: { typingTimer: null, isTyping: false, currentFullText: "", activeElementId: "", introIdx: 0, currentIdx: 0, scores: {}, testPool: [], userGender: 'male', finalNature: "", userChoices: [], player: null, isProcessing: false },
 
         init() {
-            this.cacheDOM();
-            this.bindEvents();
-            this.initAudio();
-            this.typeWriter("... (화면을 클릭하여 시작하세요)", "intro-text");
-        },
-
-        cacheDOM() {
-            this.dom = {
-                introLayer: document.getElementById("intro-layer"),
-                gameContainer: document.getElementById("game-container"),
-                textDisplay: document.getElementById("text-display"),
-                answerBox: document.getElementById("answer-box"),
-                progressFill: document.getElementById("progress-fill"),
-                stepCount: document.getElementById("step-count"),
-                volumeSlider: document.getElementById("volume-slider"),
-                muteBtn: document.getElementById("mute-btn"),
-                waveLayer: document.getElementById("wave-layer"),
-                waveMsg: document.getElementById("wave-msg"),
-                waveTrigger: document.getElementById("wave-trigger"),
-                waveFill: document.getElementById("wave-fill"),
-                waveGlow: document.getElementById("wave-glow")
+            this.dom = { introLayer: document.getElementById("intro-layer"), gameContainer: document.getElementById("game-container"), textDisplay: document.getElementById("text-display"), answerBox: document.getElementById("answer-box"), progressFill: document.getElementById("progress-fill"), stepCount: document.getElementById("step-count"), volumeSlider: document.getElementById("volume-slider"), muteBtn: document.getElementById("mute-btn"), waveLayer: document.getElementById("wave-layer"), waveMsg: document.getElementById("wave-msg"), waveTrigger: document.getElementById("wave-trigger"), waveFill: document.getElementById("wave-fill") };
+            
+            // YouTube API 초기화
+            window.onYouTubeIframeAPIReady = () => { 
+                this.state.player = new YT.Player('player', { 
+                    videoId: 'ehI75lWfXhw', 
+                    playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'controls': 0, 'disablekb': 1, 'playsinline': 1 }, 
+                    events: { 'onReady': (e) => e.target.setVolume(this.dom.volumeSlider.value) } 
+                }); 
             };
-        },
 
-        bindEvents() {
             document.getElementById("intro-next-btn").onclick = (e) => { e.stopPropagation(); this.handleIntroNext(); };
             document.body.onclick = () => { if (this.state.isTyping) this.skipTypewriter(); };
-            this.dom.volumeSlider.oninput = (e) => { if (this.state.player && this.state.player.setVolume) this.state.player.setVolume(e.target.value); };
-            this.dom.muteBtn.onclick = () => this.toggleMute();
-        },
-
-        initAudio() {
-            window.onYouTubeIframeAPIReady = () => {
-                this.state.player = new YT.Player('player', {
-                    videoId: 'ehI75lWfXhw',
-                    playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'controls': 0, 'disablekb': 1, 'playsinline': 1 },
-                    events: { 'onReady': (e) => e.target.setVolume(this.dom.volumeSlider.value) }
-                });
-            };
+            this.dom.volumeSlider.oninput = (e) => { if (this.state.player) this.state.player.setVolume(e.target.value); };
+            this.dom.muteBtn.onclick = (e) => { e.stopPropagation(); this.toggleMute(); };
+            
+            this.typeWriter("... (아래 버튼을 눌러 시작하세요)", "intro-text");
         },
 
         typeWriter(text, elementId, callback) {
+            clearTimeout(this.state.typingTimer);
             this.state.isTyping = true;
+            this.state.currentFullText = text;
             const el = document.getElementById(elementId);
-            el.innerHTML = "";
+            if (!el) return;
+            el.innerText = "";
             el.parentElement.classList.remove('cursor');
+            
             let i = 0;
-            const speed = 40;
             const self = this;
             function type() {
                 if (i < text.length) {
-                    el.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
+                    el.append(text.charAt(i));
                     i++;
-                    self.state.typingTimer = setTimeout(type, speed);
+                    self.state.typingTimer = setTimeout(type, 40);
                 } else {
                     self.state.isTyping = false;
                     el.parentElement.classList.add('cursor');
@@ -335,6 +225,11 @@
         skipTypewriter() {
             clearTimeout(this.state.typingTimer);
             this.state.isTyping = false;
+            const el = document.getElementById(this.state.activeElementId || "intro-text");
+            if (el) {
+                el.innerText = this.state.currentFullText;
+                el.parentElement.classList.add('cursor');
+            }
         },
 
         handleIntroNext() {
@@ -344,12 +239,9 @@
                 this.typeWriter(this.introTexts[this.state.introIdx], "intro-text");
                 this.state.introIdx++;
             } else {
-                this.dom.introLayer.classList.add("fade-out");
-                setTimeout(() => {
-                    this.dom.introLayer.classList.add("hidden");
-                    this.dom.gameContainer.classList.remove("hidden");
-                    this.startTest();
-                }, 500);
+                this.dom.introLayer.classList.add("hidden");
+                this.dom.gameContainer.classList.remove("hidden");
+                this.startTest();
             }
         },
 
@@ -384,7 +276,7 @@
                         this.state.userChoices.push({ q: data.q, a: ans.t });
                         this.state.currentIdx++;
                         this.renderQuestion();
-                        setTimeout(() => this.state.isProcessing = false, 200);
+                        setTimeout(() => this.state.isProcessing = false, 150);
                     };
                     this.dom.answerBox.appendChild(btn);
                 });
@@ -394,6 +286,7 @@
         askGender() {
             this.dom.answerBox.innerHTML = "";
             this.dom.stepCount.innerText = "Final Step";
+            this.dom.progressFill.style.width = "100%";
             this.typeWriter("모든 질문이 끝났다. 마지막으로 확인해 두마.\n당신은 남자인가요? 여자인가요?", "text-display", () => {
                 [{t: "남자", v: "male"}, {t: "여자", v: "female"}].forEach(g => {
                     const btn = document.createElement("button");
@@ -414,8 +307,7 @@
             const maxScore = Math.max(...Object.values(this.state.scores));
             const winners = Object.keys(this.state.scores).filter(k => this.state.scores[k] === maxScore);
             this.state.finalNature = winners[Math.floor(Math.random() * winners.length)];
-            const themeColor = this.waveColors[this.state.finalNature];
-            document.documentElement.style.setProperty('--wave-color', themeColor);
+            document.documentElement.style.setProperty('--wave-color', this.waveColors[this.state.finalNature]);
         },
 
         startWaveScan() {
@@ -427,10 +319,11 @@
                 if (sIdx < scanTexts.length) {
                     this.dom.waveMsg.innerText = scanTexts[sIdx];
                     sIdx++;
-                    setTimeout(showScanIntro, 1800);
+                    setTimeout(showScanIntro, 1600);
                 } else {
                     this.dom.waveMsg.innerHTML = "당신의 파동을 전달해 주세요...<br>(PUSH 버튼을 길게 누르세요)";
                     this.dom.waveTrigger.classList.remove("hidden");
+                    this.dom.waveTrigger.classList.add("anim-pulse");
                     this.setupWaveEvent();
                 }
             };
@@ -442,32 +335,35 @@
             let progress = 0;
             const trigger = this.dom.waveTrigger;
             const fill = this.dom.waveFill;
+
             const onStart = (e) => {
                 e.preventDefault();
                 if (pressTimer) return;
+                trigger.classList.remove("anim-pulse");
                 pressTimer = setInterval(() => {
-                    progress += 1.5;
+                    progress += 2.0;
                     fill.style.height = progress + "%";
                     if (navigator.vibrate) navigator.vibrate(10);
-                    if (progress >= 100) { clearInterval(pressTimer); this.completeScan(); }
+                    if (progress >= 100) { clearInterval(pressTimer); completeScan(); }
                 }, 30);
             };
-            const onEnd = () => { if (progress < 100) { clearInterval(pressTimer); pressTimer = null; progress = 0; fill.style.height = "0%"; } };
-            trigger.onpointerdown = onStart; window.onpointerup = onEnd; trigger.ontouchstart = onStart; window.ontouchend = onEnd;
-        },
 
-        completeScan() {
-            this.dom.waveMsg.innerHTML = `<span style="color:var(--accent-yellow)">너의 파동을 알았다.</span><br>당신의 기운이 느껴집니다...`;
-            this.dom.waveTrigger.style.pointerEvents = "none";
-            setTimeout(() => {
-                this.dom.waveLayer.style.transition = "opacity 1s";
-                this.dom.waveLayer.style.opacity = "0";
+            const onEnd = () => { if(progress < 100) { clearInterval(pressTimer); pressTimer = null; progress = 0; fill.style.height = "0%"; trigger.classList.add("anim-pulse"); } };
+
+            const completeScan = () => {
+                trigger.onpointerdown = null; trigger.ontouchstart = null;
+                this.dom.waveMsg.innerHTML = `<span style="color:var(--accent-yellow)">너의 파동을 알았다.</span><br>당신의 기운이 느껴집니다...`;
                 setTimeout(() => {
-                    this.dom.waveLayer.classList.add("hidden");
-                    this.dom.gameContainer.classList.remove("hidden");
-                    this.showResult();
-                }, 1000);
-            }, 1500);
+                    this.dom.waveLayer.style.opacity = "0";
+                    setTimeout(() => {
+                        this.dom.waveLayer.classList.add("hidden");
+                        this.dom.gameContainer.classList.remove("hidden");
+                        this.showResult();
+                    }, 1000);
+                }, 1500);
+            };
+
+            trigger.onpointerdown = onStart; window.onpointerup = onEnd; trigger.ontouchstart = onStart; window.ontouchend = onEnd;
         },
 
         showResult() {
@@ -490,12 +386,11 @@
                                 그걸 보니 너는 아무래도...<br>
                                 [<span style="color:var(--accent-yellow)">${natureName}</span>] 성격인 거 같아.
                             </div>
-                            <div style="font-size:1.1rem; margin-bottom:5px;">당신과 닮은 포켓몬은...</div>
+                            <div class="result-nature-tag">그런 당신과 닮은 포켓몬은...</div>
                             <div class="result-poke-name">${resultName}!</div>
                             <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png" alt="result">
-                            <div style="height:20px;"></div>
-                            <button class="btn-base" onclick="location.reload()" style="width:80%"><span>▶</span> 다시 하기</button>
-                            <button class="btn-base" id="share-btn" style="width:80%; margin-top:10px; background:rgba(56,248,56,0.2);"><span>▶</span> 결과 공유하기</button>
+                            <button class="btn-center" onclick="location.reload()"><span>▶</span> 다시 하기</button>
+                            <button class="btn-center" id="share-btn" style="background:rgba(56,248,56,0.15); border-color:var(--wave-color); margin-top:10px;"><span>▶</span> 결과 공유하기</button>
                         </div>
                     `;
                     const img = document.getElementById("pokemon-img");
@@ -507,8 +402,11 @@
 
         async shareResult(nature, poke) {
             const text = `[포켓몬 성격 테스트]\n나의 성격: ${nature}\n닮은 포켓몬: ${poke}\n지금 테스트 하기: ${window.location.href}`;
-            if (navigator.share) { try { await navigator.share({ title: '포켓몬 성격 테스트', text: text, url: window.location.href }); } catch (err) {}
-            } else { navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!")); }
+            if (navigator.share) {
+                try { await navigator.share({ title: '포켓몬 성격 테스트', text: text, url: window.location.href }); } catch (err) {}
+            } else {
+                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
+            }
         },
 
         toggleMute() {
@@ -518,6 +416,7 @@
             else { this.state.player.mute(); icon.innerText = "🔇"; }
         }
     };
+
     window.onload = () => App.init();
 </script>
 </body>
