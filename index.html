@@ -4,19 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>포켓몬 성격 테스트 | PMD Master</title>
+    
+    <!-- SEO 및 SNS 공유 설정 -->
+    <meta name="description" content="나의 오라를 감지하여 어떤 포켓몬이 될지 확인해보세요!">
+    <meta property="og:title" content="포켓몬 성격 테스트 | PMD Master">
+    <meta property="og:description" content="당신은 어떤 포켓몬일까요? 불가사의 던전의 성격 진단을 시작합니다.">
+    <meta property="og:type" content="website">
+
     <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
-    <!-- 유튜브 API 스크립트 추가 -->
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
             --window-bg: #1a202c;
             --border-green: #38f838;
             --text-white: #ffffff;
-            --bg-dark: #0f172a; /* 눈이 편안한 다크 블루 배경 */
+            --bg-dark: #0a0e17; 
             --bg-grid: rgba(56, 248, 56, 0.05);
         }
 
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; }
         
         body {
             font-family: 'DungGeunMo', monospace;
@@ -29,12 +35,13 @@
             background-size: 30px 30px;
             color: var(--text-white);
             overflow: hidden;
+            user-select: none;
         }
 
         #game-container {
             width: 95%; max-width: 500px;
             display: flex; flex-direction: column; gap: 15px;
-            z-index: 10;
+            z-index: 10; padding: 10px;
         }
 
         .window {
@@ -43,26 +50,25 @@
             border-radius: 8px;
             box-shadow: 0 0 15px rgba(56, 248, 56, 0.2);
             padding: 20px;
-            position: relative;
         }
 
         #intro-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 100; display: flex; flex-direction: column;
+            background: #000; z-index: 1000; display: flex; flex-direction: column;
             justify-content: center; align-items: center; padding: 20px;
         }
         
         #intro-text {
-            font-size: 1.4rem; line-height: 1.8; text-align: center;
+            font-size: 1.3rem; line-height: 1.8; text-align: center;
             word-break: keep-all; color: #fff; max-width: 85%;
-            min-height: 100px;
+            min-height: 120px;
         }
 
         .next-btn {
-            position: fixed; bottom: 80px; width: 80%; max-width: 300px;
+            margin-top: 50px; width: 80%; max-width: 300px;
             background: transparent; color: #fff; border: 4px solid var(--border-green);
             padding: 15px; font-family: inherit; font-size: 1.2rem; cursor: pointer;
-            transition: 0.2s;
+            border-radius: 10px; transition: 0.2s;
         }
         .next-btn:active { background: var(--border-green); color: #000; }
 
@@ -73,63 +79,61 @@
         #question-box {
             min-height: 160px; font-size: 1.2rem; line-height: 1.6;
             display: flex; align-items: center; justify-content: center; text-align: center;
+            word-break: keep-all;
         }
-        #answer-box { display: flex; flex-direction: column; gap: 10px; min-height: 150px; }
+        #answer-box { display: flex; flex-direction: column; gap: 10px; min-height: 160px; }
 
         .btn {
             background: rgba(255,255,255,0.05); border: 2px solid transparent; color: var(--text-white);
             font-family: inherit; font-size: 1.1rem; text-align: left;
             padding: 12px 15px 12px 40px; cursor: pointer; position: relative;
-            transition: 0.2s; border-radius: 5px;
+            border-radius: 5px; transition: 0.2s;
         }
-        .btn:hover { background: rgba(56, 248, 56, 0.1); border-color: var(--border-green); }
-        .btn::before { content: '▶'; position: absolute; left: 15px; opacity: 0; transition: 0.2s; }
-        .btn:hover::before { opacity: 1; }
+        .btn:hover { background: rgba(56, 248, 56, 0.15); border-color: var(--border-green); }
+        .btn::before { content: '▶'; position: absolute; left: 15px; }
 
         #aura-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(56, 248, 56, 0.3) 0%, #000 90%);
+            background: radial-gradient(circle, rgba(56, 248, 56, 0.4) 0%, #000 90%);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 200; text-align: center; color: #fff;
-            user-select: none;
+            z-index: 2000; text-align: center; color: #fff;
         }
 
         .aura-circle {
-            width: 100px; height: 100px; border: 4px solid var(--border-green);
+            width: 130px; height: 130px; border: 4px solid var(--border-green);
             border-radius: 50%; margin-top: 30px; position: relative;
-            display: flex; justify-content: center; align-items: center;
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
+            box-shadow: 0 0 20px var(--border-green); transition: transform 0.1s;
         }
+        .aura-circle:active { transform: scale(0.95); }
         .aura-fill {
             position: absolute; width: 0%; height: 0%; background: var(--border-green);
-            border-radius: 50%; opacity: 0.5; transition: 0.1s linear;
+            border-radius: 50%; opacity: 0.6; transition: 0.1s linear;
         }
 
-        .result-layout { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
-        #pokemon-img { width: 180px; height: 180px; margin: 15px 0; object-fit: contain; filter: drop-shadow(0 0 10px var(--border-green)); }
+        .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 1s; }
+        .result-nature { font-size: 1.1rem; color: var(--border-green); margin-bottom: 5px; }
+        .result-pokemon { font-size: 1.8rem; margin-bottom: 15px; border-bottom: 2px solid #fff; padding-bottom: 5px; }
+        #pokemon-img { width: 200px; height: 200px; margin: 10px 0; object-fit: contain; filter: drop-shadow(0 0 15px rgba(255,255,255,0.3)); }
 
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0% { box-shadow: 0 0 10px var(--border-green); } 50% { box-shadow: 0 0 30px var(--border-green); } 100% { box-shadow: 0 0 10px var(--border-green); } }
+        .anim-pulse { animation: pulse 1s infinite; }
+        
         .hidden { display: none !important; }
         #player { position: fixed; bottom: 0; right: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
         .controls { text-align: center; margin-top: 15px; color: #64748b; font-size: 12px; }
-        
-        @keyframes breathe {
-            0% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.5; }
-        }
-        .anim-breathe { animation: breathe 1.5s infinite; }
     </style>
 </head>
 <body>
 
 <div id="player"></div>
 
-<!-- 인트로 레이어 -->
 <div id="intro-layer">
     <div id="intro-text"></div>
-    <button class="next-btn" id="intro-next-btn" onclick="nextIntro()">다음 (Next)</button>
+    <button class="next-btn" id="next-btn-el" onclick="nextIntro()">다음 (Next)</button>
 </div>
 
-<!-- 메인 게임 레이어 -->
 <div id="game-container" class="hidden">
     <div id="ui-header">
         <div class="status-bar">
@@ -143,21 +147,20 @@
     </div>
     <div id="answer-box" class="window"></div>
     <div class="controls">
-        BGM 🔈 <input type="range" id="volume-slider" min="0" max="100" value="30"> 🔊
+        BGM 🔈 <input type="range" id="volume-slider" min="0" max="100" value="30" step="5"> 🔊
     </div>
 </div>
 
-<!-- 오라 감지 레이어 -->
 <div id="aura-layer" class="hidden">
-    <p style="font-size: 1.3rem; padding: 0 20px;">모든 질문이 끝났습니다...<br><br>화면의 원을 <strong>길게 꾹 눌러서</strong><br>당신의 파동을 전달해 주세요.</p>
-    <div class="aura-circle" id="aura-trigger">
+    <div id="aura-msg" style="font-size: 1.3rem; padding: 0 30px; line-height: 1.8; min-height: 150px;"></div>
+    <div class="aura-circle hidden" id="aura-trigger">
         <div class="aura-fill" id="aura-fill"></div>
-        <span style="z-index:1">PUSH</span>
+        <span style="z-index:1; font-weight: bold; text-shadow: 1px 1px 2px #000;">PUSH</span>
     </div>
 </div>
 
 <script>
-    // --- 데이터 (동일하게 유지하되 질문 로직 최적화) ---
+    // --- 데이터 (ALL_QUESTIONS 유지) ---
     const INTRO_TEXTS = [
         "어서 오너라!",
         "여기는 포켓몬들의 세계로\n통하는 입구다!",
@@ -240,7 +243,7 @@
     const POKEMON_MAP = { male: { Hardy: "아차모", Docile: "파이리", Brave: "피카츄", Jolly: "리아코", Impish: "팽도리", Naive: "불꽃숭이", Bold: "모부기", Timid: "브케인", Hasty: "에나비", Sassy: "냐옹", Quiet: "나무지기", Relaxed: "먹고자", Rash: "물짱이", Quirky: "꼬부기", Lonely: "이상해씨", Calm: "치코리타" }, female: { Hardy: "나무지기", Docile: "이상해씨", Brave: "파이리", Jolly: "먹고자", Impish: "불꽃숭이", Naive: "에나비", Bold: "꼬부기", Timid: "모부기", Hasty: "피카츄", Sassy: "리아코", Quiet: "치코리타", Relaxed: "식스테일", Rash: "아차모", Quirky: "팽도리", Lonely: "물짱이", Calm: "브케인" } };
     const ID_MAP = { "아차모": 255, "파이리": 4, "피카츄": 25, "리아코": 158, "팽도리": 393, "불꽃숭이": 390, "모부기": 387, "브케인": 155, "에나비": 300, "냐옹": 52, "나무지기": 252, "먹고자": 446, "물짱이": 258, "꼬부기": 7, "이상해씨": 1, "치코리타": 152, "식스테일": 37 };
 
-    // --- 변수 관리 ---
+    // --- 앱 상태 변수 ---
     let introIdx = 0;
     let isTyping = false;
     let currentIdx = 0;
@@ -248,19 +251,21 @@
     let testPool = [];
     let userGender = '';
     let player;
+    let isPlayerReady = false;
 
-    // --- 유튜브 API 로드 대기 ---
+    // --- 유튜브 API 핸들러 ---
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
             videoId: 'ehI75lWfXhw',
-            playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'controls': 0, 'disablekb': 1 },
+            playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'controls': 0, 'disablekb': 1, 'playsinline': 1 },
             events: {
-                'onReady': (e) => { e.target.setVolume(30); }
+                'onReady': (e) => { isPlayerReady = true; e.target.setVolume(30); },
+                'onError': () => { console.warn("BGM 로드 실패. 게임은 계속 가능합니다."); }
             }
         });
     }
 
-    // --- 텍스트 타이핑 효과 ---
+    // --- 유틸리티: 타이핑 효과 ---
     function typeWriter(text, elementId, callback) {
         if (isTyping) return;
         isTyping = true;
@@ -276,15 +281,15 @@
                 isTyping = false;
                 if (callback) callback();
             }
-        }, 40);
+        }, 15);
     }
 
-    // --- 인트로 제어 ---
+    // --- 흐름 제어: 인트로 ---
     function nextIntro() {
         if (isTyping) return;
         
-        // 첫 클릭 시 오디오 시작 (브라우저 정책 준수)
-        if (introIdx === 0 && player && player.playVideo) {
+        // 사운드 재생 시도 (사용자 상호작용 필요)
+        if (introIdx === 0 && isPlayerReady) {
             player.playVideo();
         }
 
@@ -329,11 +334,9 @@
         }
         const data = testPool[currentIdx];
         document.getElementById("answer-box").innerHTML = "";
-        
         typeWriter(data.q, "text-display", () => {
             document.getElementById("step-count").innerText = `${currentIdx + 1} / 20`;
             document.getElementById("progress-fill").style.width = `${((currentIdx + 1) / 20) * 100}%`;
-            
             data.a.forEach(ans => {
                 const btn = document.createElement("button");
                 btn.className = "btn";
@@ -349,78 +352,112 @@
         });
     }
 
-    // --- 오라 스캔 (홀드 기능 개선) ---
+    // --- 흐름 제어: 오라 감지 ---
     function startAuraScan() {
         document.getElementById("game-container").classList.add("hidden");
         const auraLayer = document.getElementById("aura-layer");
+        const auraMsg = document.getElementById("aura-msg");
         const trigger = document.getElementById("aura-trigger");
         const fill = document.getElementById("aura-fill");
         auraLayer.classList.remove("hidden");
         
-        let pressTimer;
-        let progress = 0;
-
-        const startPress = (e) => {
-            e.preventDefault();
-            trigger.classList.add("anim-breathe");
-            pressTimer = setInterval(() => {
-                progress += 2;
-                fill.style.width = progress + "%";
-                fill.style.height = progress + "%";
-                if (progress >= 100) {
-                    clearInterval(pressTimer);
-                    completeScan();
-                }
-            }, 30);
+        const scanTexts = [
+            "진단이 끝났습니다...",
+            "이제 당신의 오라(Aura)를 감지하겠습니다.",
+            "화면의 원 위에 손가락을 대고...",
+            "마음을 차분히 가라앉히세요."
+        ];
+        
+        let sIdx = 0;
+        const showScanIntro = () => {
+            if(sIdx < scanTexts.length) {
+                auraMsg.innerText = scanTexts[sIdx];
+                sIdx++;
+                setTimeout(showScanIntro, 1200);
+            } else {
+                auraMsg.innerHTML = "당신의 파동을 전달해 주세요...<br>(원을 꾹 누르세요)";
+                trigger.classList.remove("hidden");
+                trigger.classList.add("anim-pulse");
+                setupAuraEvent();
+            }
         };
+        showScanIntro();
 
-        const stopPress = () => {
-            trigger.classList.remove("anim-breathe");
-            clearInterval(pressTimer);
-            progress = 0;
-            fill.style.width = "0%";
-            fill.style.height = "0%";
-        };
+        function setupAuraEvent() {
+            let pressTimer;
+            let progress = 0;
 
-        trigger.onmousedown = trigger.ontouchstart = startPress;
-        window.onmouseup = window.ontouchend = stopPress;
+            const onStart = (e) => {
+                e.preventDefault();
+                if (pressTimer) return;
+                pressTimer = setInterval(() => {
+                    progress += 2.5;
+                    fill.style.width = progress + "%";
+                    fill.style.height = progress + "%";
+                    if (progress >= 100) {
+                        clearInterval(pressTimer);
+                        completeScan();
+                    }
+                }, 30);
+            };
 
-        function completeScan() {
-            window.onmouseup = window.ontouchend = null;
-            auraLayer.innerHTML = "<p style='font-size:1.5rem'>파동을 수신했습니다...</p>";
-            setTimeout(() => {
-                auraLayer.classList.add("hidden");
-                document.getElementById("game-container").classList.remove("hidden");
-                showResult();
-            }, 1500);
+            const onEnd = () => {
+                clearInterval(pressTimer);
+                pressTimer = null;
+                progress = 0;
+                fill.style.width = "0%";
+                fill.style.height = "0%";
+            };
+
+            trigger.addEventListener('touchstart', onStart, {passive: false});
+            trigger.addEventListener('mousedown', onStart);
+            window.addEventListener('touchend', onEnd);
+            window.addEventListener('mouseup', onEnd);
+
+            function completeScan() {
+                trigger.removeEventListener('touchstart', onStart);
+                trigger.removeEventListener('mousedown', onStart);
+                trigger.classList.remove("anim-pulse");
+                auraMsg.innerHTML = "<span style='color:#38f838'>파동을 수신했습니다!</span><br>당신의 오라는 청명한 에메랄드빛입니다.";
+                setTimeout(() => {
+                    auraLayer.classList.add("hidden");
+                    document.getElementById("game-container").classList.remove("hidden");
+                    showResult();
+                }, 2000);
+            }
         }
     }
 
+    // --- 흐름 제어: 결과창 ---
     function showResult() {
         document.getElementById("ui-header").classList.add("hidden");
         const maxScore = Math.max(...Object.values(scores));
         const winners = Object.keys(scores).filter(k => scores[k] === maxScore);
         const topKey = winners[Math.floor(Math.random() * winners.length)];
+        const natureName = KOREAN_TYPE_MAP[topKey];
         const resultName = POKEMON_MAP[userGender][topKey];
         const pokeId = ID_MAP[resultName];
 
         document.getElementById("answer-box").innerHTML = "";
-        typeWriter(`진단이 완료되었습니다... 당신의 성격은 [${KOREAN_TYPE_MAP[topKey]}]!`, "text-display", () => {
+        typeWriter(`분석 결과가 나왔습니다... 당신의 성격은 [${natureName}]!`, "text-display", () => {
             setTimeout(() => {
                 document.getElementById("question-box").innerHTML = `
                     <div class="result-layout">
-                        <p>당신은 바로... <strong>${resultName}</strong>입니다!</p>
-                        <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png">
-                        <button class="btn" style="text-align:center; padding-left:15px; border-color:white;" onclick="location.reload()">다시 하기</button>
+                        <div class="result-nature">${natureName} 성격의 소유자...</div>
+                        <div class="result-pokemon">${resultName}</div>
+                        <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png" alt="${resultName}">
+                        <button class="btn" style="text-align:center; padding-left:15px; border-color:white; margin-top:10px;" onclick="location.reload()">다시 하기</button>
                     </div>`;
-            }, 1500);
+            }, 1000);
         });
     }
 
+    // 볼륨 조절
     document.getElementById('volume-slider').oninput = (e) => {
-        if (player && player.setVolume) player.setVolume(e.target.value);
+        if (isPlayerReady) player.setVolume(e.target.value);
     };
 
+    // 초기 실행
     window.onload = () => {
         typeWriter("... (아래 버튼을 눌러 시작하세요)", "intro-text");
     };
