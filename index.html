@@ -3,212 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>포켓몬 성격 진단 | PMD Master</title>
-    <!-- Open Graph (SNS 공유용) -->
-    <meta property="og:title" content="포켓몬 성격 진단 | PMD Master">
-    <meta property="og:description" content="나의 파동으로 닮은 포켓몬을 찾아보세요!">
-    <meta property="og:image" content="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png">
-    
     <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap" rel="stylesheet">
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root { 
-            --window-bg: #1a202c; 
-            --border-green: #38f838; 
-            --wave-color: #38f838; 
-            --text-white: #ffffff; 
-            --bg-dark: #0a0e17; 
-            --bg-grid: rgba(56, 248, 56, 0.05); 
+            --window-bg: #1a202c; --border-green: #38f838; --wave-color: #38f838; 
+            --text-white: #ffffff; --bg-dark: #0a0e17; --bg-grid: rgba(56, 248, 56, 0.05); 
             --accent-yellow: #f8f838; 
         }
         
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; -webkit-touch-callout: none; user-select: none; }
-        
         body { 
-            font-family: 'DungGeunMo', monospace; 
-            margin: 0; padding: 0; 
+            font-family: 'DungGeunMo', monospace; margin: 0; padding: 0; 
             display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; min-height: 100dvh; 
-            background-color: var(--bg-dark); 
+            min-height: 100vh; min-height: 100dvh; background-color: var(--bg-dark); 
             background-image: linear-gradient(var(--bg-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
-            background-size: 30px 30px; 
-            color: var(--text-white); 
-            overflow: hidden; touch-action: none;
+            background-size: 30px 30px; color: var(--text-white); overflow: hidden; touch-action: none;
         }
 
-        /* 메인 컨테이너 */
-        #game-container { width: 95%; max-width: 500px; z-index: 10; padding: env(safe-area-inset-top) 10px env(safe-area-inset-bottom); }
+        #game-container { width: 95%; max-width: 500px; z-index: 10; padding: env(safe-area-inset-top) 10px 80px; position: relative; }
         .window { 
-            background: var(--window-bg); 
-            border: 4px solid var(--border-green); 
-            border-radius: 12px; 
-            box-shadow: 0 0 25px rgba(0,0,0,0.8), inset 0 0 15px rgba(56, 248, 56, 0.1); 
+            background: var(--window-bg); border: 4px solid var(--border-green); 
+            border-radius: 12px; box-shadow: 0 0 25px rgba(0,0,0,0.8); 
             padding: 24px; position: relative; 
-            transition: all 0.3s ease;
         }
+
+        /* 레이어 관리 */
+        #intro-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        #intro-text-box { min-height: 150px; display: flex; align-items: center; justify-content: center; }
+        #intro-text { font-size: 1.3rem; line-height: 1.8; text-align: center; word-break: keep-all; max-width: 85%; }
+
+        /* 진단 중 레이아웃 고정 (점핑 방지) */
+        #testing-ui { display: flex; flex-direction: column; min-height: 520px; justify-content: flex-start; }
+        #question-box { height: 180px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 1.25rem; line-height: 1.7; word-break: keep-all; margin-bottom: 20px; flex-shrink: 0; }
+        #answer-box { height: 280px; display: flex; flex-direction: column; gap: 12px; justify-content: flex-start; }
+
+        .btn-center { margin: 20px auto 0; width: 85%; max-width: 280px; background: rgba(56, 248, 56, 0.1); color: #fff; border: 3px solid var(--border-green); padding: 16px; font-family: inherit; font-size: 1.2rem; cursor: pointer; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
+        .btn-center:active { transform: scale(0.95); background: var(--border-green); color: #000; }
         
-        /* 인트로 레이어 */
-        #intro-layer { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #000; z-index: 1000; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; 
-        }
-        #intro-text { font-size: 1.3rem; line-height: 1.8; text-align: center; word-break: keep-all; max-width: 85%; min-height: 4em; }
+        .btn-choice { background: rgba(255,255,255,0.04); border: 2px solid #334155; color: var(--text-white); font-family: inherit; font-size: 1.05rem; text-align: left; padding: 14px 15px 14px 45px; cursor: pointer; position: relative; border-radius: 10px; transition: 0.2s; width: 100%; }
+        .btn-choice::before { content: '▶'; position: absolute; left: 18px; color: var(--border-green); }
+        .btn-choice:hover { border-color: var(--border-green); background: rgba(56, 248, 56, 0.1); }
         
-        /* 버튼 스타일 */
-        .btn-center { 
-            margin: 25px auto 0; width: 85%; max-width: 280px; 
-            background: rgba(56, 248, 56, 0.1); color: #fff; 
-            border: 3px solid var(--border-green); padding: 16px; 
-            font-family: inherit; font-size: 1.2rem; cursor: pointer; 
-            border-radius: 15px; transition: 0.2s; 
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        .btn-center:active { background: var(--border-green); color: #000; transform: scale(0.96); }
+        .progress-bar { height: 14px; background: #1e293b; border-radius: 7px; overflow: hidden; border: 1px solid #334155; margin-bottom: 20px; }
+        #progress-fill { height: 100%; background: linear-gradient(90deg, #166534, var(--border-green)); width: 0%; transition: width 0.3s; }
         
-        /* 프로그레스 바 */
-        .status-bar { display: flex; justify-content: space-between; color: var(--border-green); font-size: 14px; margin-bottom: 10px; font-weight: bold; }
-        .progress-bar { height: 14px; background: #1e293b; border-radius: 7px; overflow: hidden; border: 1px solid #334155; }
-        #progress-fill { height: 100%; background: linear-gradient(90deg, #166534, var(--border-green)); width: 0%; transition: width 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        /* 파동 레이어 */
+        #wave-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, var(--wave-color) 0%, #000 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; text-align: center; color: #fff; transition: opacity 0.8s; overflow: hidden; }
+        #wave-msg { font-size: 1.35rem; font-weight: bold; padding: 0 40px; line-height: 1.8; min-height: 120px; text-shadow: 2px 2px 10px #000; z-index: 2005; }
+        .wave-circle { width: 180px; height: 180px; border: 6px solid #fff; border-radius: 50%; margin-top: 30px; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; box-shadow: 0 0 40px rgba(255,255,255,0.3); z-index: 2001; cursor: pointer; }
         
-        /* 질문/선택지 박스 */
-        #question-box { min-height: 180px; font-size: 1.25rem; line-height: 1.7; display: flex; align-items: center; justify-content: center; text-align: center; word-break: keep-all; }
-        #answer-box { display: flex; flex-direction: column; gap: 14px; }
-        .btn-choice { 
-            background: rgba(255,255,255,0.04); border: 2px solid #334155; 
-            color: var(--text-white); font-family: inherit; font-size: 1.1rem; 
-            text-align: left; padding: 15px 15px 15px 45px; 
-            cursor: pointer; position: relative; border-radius: 10px; transition: 0.2s; width: 100%; 
-        }
-        .btn-choice:hover { background: rgba(56, 248, 56, 0.08); border-color: var(--border-green); }
-        .btn-choice::before { content: '▶'; position: absolute; left: 18px; color: var(--border-green); font-size: 0.9rem; }
+        /* 중앙에서 커지는 파동 충전 */
+        .wave-fill { position: absolute; width: 0%; height: 0%; background: #fff; opacity: 0.8; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; transition: width 0.1s linear, height 0.1s linear; }
         
+        .wave-ring { position: absolute; border: 4px solid #fff; border-radius: 50%; pointer-events: none; animation: ring-expand 2.5s ease-out forwards; opacity: 0; }
+        @keyframes ring-expand { 0% { width: 50px; height: 50px; opacity: 0.8; } 100% { width: 1000px; height: 1000px; opacity: 0; } }
+
+        /* 결과 창 */
+        #result-ui { max-height: 85vh; overflow-y: auto; }
+        .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.8s forwards; }
+        #pokemon-img { width: 220px; height: 220px; object-fit: contain; filter: drop-shadow(0 0 15px var(--wave-color)); opacity: 0; transition: opacity 0.8s; margin: 15px 0; }
+        .result-poke-name { font-size: 2.5rem; border-bottom: 4px solid var(--border-green); margin-bottom: 15px; text-shadow: 0 0 15px var(--wave-color); }
+        .result-nature-tag { color: var(--accent-yellow); font-size: 1.3rem; font-weight: bold; margin-bottom: 5px; }
+
+        /* 사운드 바 최하단 격리 */
+        .audio-ctrl { position: fixed; bottom: 20px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; gap: 15px; color: #94a3b8; font-size: 14px; z-index: 3000; pointer-events: auto; }
+        input[type=range] { accent-color: var(--border-green); width: 80px; cursor: pointer; }
+
+        .hidden { display: none !important; }
         .cursor::after { content: ' ▼'; animation: blink 0.8s infinite; color: var(--border-green); }
         @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
-        
-        /* 파동 레이어 전용 */
-        #wave-layer { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: radial-gradient(circle at center, var(--wave-color) 0%, #000 100%); 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 2000; text-align: center; color: #fff; transition: opacity 0.8s ease; overflow: hidden; 
-        }
-        #wave-msg { font-size: 1.4rem; font-weight: bold; padding: 0 40px; line-height: 1.8; min-height: 120px; text-shadow: 2px 2px 10px #000; z-index: 2005; }
-        .wave-circle { 
-            width: 190px; height: 190px; border: 6px solid #fff; border-radius: 50%; 
-            margin-top: 40px; position: relative; display: flex; justify-content: center; align-items: center; 
-            box-shadow: 0 0 50px rgba(255,255,255,0.3); z-index: 2001;
-        }
-        .wave-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: #fff; opacity: 0.7; pointer-events: none; border-radius: 50%; transition: height 0.1s linear; }
-        
-        .wave-ring { 
-            position: absolute; border: 4px solid #fff; border-radius: 50%; 
-            pointer-events: none; animation: ring-expand 2.8s ease-out forwards; opacity: 0; 
-        }
-        @keyframes ring-expand {
-            0% { width: 100px; height: 100px; opacity: 0.8; border-width: 8px; }
-            100% { width: 1200px; height: 1200px; opacity: 0; border-width: 1px; }
-        }
-
-        /* 결과 화면 */
-        #result-ui { max-height: 85vh; overflow-y: auto; scrollbar-width: none; }
-        #result-ui::-webkit-scrollbar { display: none; }
-        .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 1s; padding-bottom: 20px; }
-        .result-desc { font-size: 1.1rem; line-height: 1.8; margin: 20px 0; color: #cbd5e1; text-align: center; word-break: keep-all; }
-        .img-container { width: 230px; height: 230px; margin: 15px 0; position: relative; }
-        #pokemon-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 20px var(--wave-color)); opacity: 0; transition: opacity 0.8s; }
-        .result-nature-tag { color: var(--accent-yellow); font-weight: bold; margin-bottom: 8px; font-size: 1.35rem; }
-        .result-poke-name { font-size: 2.7rem; border-bottom: 4px solid var(--border-green); padding-bottom: 5px; margin-bottom: 20px; text-shadow: 0 0 15px var(--wave-color); }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        .hidden { display: none !important; }
-        .anim-pulse { animation: pulse 2.5s infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255,255,255,0.3); } 50% { transform: scale(1.08); box-shadow: 0 0 60px rgba(255,255,255,0.6); } }
-        
-        #player { position: fixed; bottom: 0; right: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-        .audio-ctrl { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 25px; color: #94a3b8; font-size: 14px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 <div id="player"></div>
 
-<!-- 인트로 장면 -->
 <div id="intro-layer">
     <div id="intro-text-box"><span id="intro-text"></span></div>
     <button class="btn-center" id="intro-next-btn"><span>▶</span> 다음 (Next)</button>
 </div>
 
-<!-- 게임 메인 UI -->
 <div id="game-container" class="hidden">
     <div id="testing-ui">
         <div class="status-bar"><span id="step-name">성격 진단 중...</span><span id="step-count">0 / 20</span></div>
         <div class="progress-bar"><div id="progress-fill"></div></div>
-        <div style="height:30px;"></div>
         <div id="question-box" class="window"><div id="text-display"></div></div>
-        <div style="height:25px;"></div>
         <div id="answer-box"></div>
     </div>
-
-    <!-- 결과 UI -->
     <div id="result-ui" class="window hidden">
         <div id="result-display"></div>
     </div>
-
-    <!-- 하단 컨트롤 -->
-    <div class="audio-ctrl">
-        <span id="mute-btn" style="cursor:pointer; font-size:20px;">🔊</span>
-        <input type="range" id="volume-slider" min="0" max="100" value="35" style="accent-color:var(--border-green); width:90px;">
-    </div>
 </div>
 
-<!-- 파동 진단 레이어 -->
 <div id="wave-layer" class="hidden">
     <div id="wave-msg"></div>
     <div class="wave-circle hidden" id="wave-trigger">
         <div class="wave-fill" id="wave-fill"></div>
-        <span style="z-index:2010; font-weight: bold; color:#000; letter-spacing: 2px; pointer-events: none;">PUSH</span>
+        <span style="z-index:2010; font-weight: bold; color:#000; pointer-events: none; letter-spacing: 2px;">PUSH</span>
     </div>
+    <button id="wave-next-btn" class="btn-center hidden"><span>▶</span> 결과 보기</button>
+</div>
+
+<div class="audio-ctrl">
+    <span id="mute-btn" style="cursor:pointer; font-size:18px;">🔊</span>
+    <input type="range" id="volume-slider" min="0" max="100" value="30">
 </div>
 
 <script>
     const App = {
-        // [데이터] 원작 기반 질문 리스트 (일부 생략 및 최적화)
+        // [데이터] 65개 질문 전체 복원
         questions: [
             { q: "휴일인데 아무도 놀아 주지 않는다... 그럼 당신은?", a: [{t: "여행을 떠난다", s: {Jolly: 4, Rash: 2}}, {t: "멍하게 있는다", s: {Relaxed: 4, Calm: 2}}, {t: "방구석에 박혀있는다", s: {Lonely: 4, Quiet: 2}}] },
             { q: "비밀을 무심코 누설해버린 적이 있는가?", a: [{t: "있다", s: {Rash: 4, Lonely: 4}}, {t: "없다", s: {Hardy: 2}}] },
-            { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
+            { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "절반은 쓰고 절반은 모은다", s: {Calm: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
             { q: "매일 복근 운동 10회. 계속할 수 있을까?", a: [{t: "이 정도는 누워서 떡 먹기다", s: {Impish: 4, Sassy: 2}}, {t: "열심히 해 본다", s: {Hardy: 4}}, {t: "처음부터 할 생각이 없다", s: {Quirky: 4}}] },
             { q: "모르는 것은 모른다고 솔직하게 말할 수 있는가?", a: [{t: "말할 수 있다", s: {Docile: 4, Bold: 2}}, {t: "잘 말하지 못한다", s: {Timid: 4, Lonely: 2}}] },
             { q: "장래를 점쳐 보니 결과가 매우 나빴다. 너라면?", a: [{t: "매우 불안해진다", s: {Docile: 4, Timid: 2}}, {t: "잊어버린다", s: {Jolly: 4, Relaxed: 2, Bold: 2}}] },
+            { q: "굉장히 도움이 되는 정보를 얻었다! 너라면?", a: [{t: "비밀로 간직한다", s: {Bold: 4, Timid: 2}}, {t: "친구에게 가르쳐 준다", s: {Docile: 4, Rash: 4}}, {t: "다른 정보를 흘린다", s: {Impish: 4}}] },
             { q: "풍선을 얼마만큼 불 수 있는가?", a: [{t: "터지기 직전까지 팽팽하게", s: {Brave: 4, Impish: 4}}, {t: "적당히 그만둔다", s: {Quiet: 2}}, {t: "무서워서 불지 못한다", s: {Timid: 4, Docile: 2}}] },
-            { q: "모두와 다른 의견이라도 확실히 말할 수 있는가?", a: [{t: "예", s: {Brave: 4, Bold: 2}}, {t: "아니오", s: {Lonely: 4, Timid: 2}}] },
+            { q: "모두와 다른 의견이라도 확실히 말할 수 있는가?", a: [{t: "예", s: {Brave: 4, Bold: 2}}, {t: "아니오", s: {Lonely: 4, Timid: 2}}, {t: "상황에 따라 다르다", s: {Calm: 2, Quirky: 2}}] },
+            { q: "매우 좋아하는 사람에게 고백하고 싶다! 너라면?", a: [{t: "일단 함께 놀자고 한다", s: {Jolly: 4, Calm: 2}}, {t: "장난을 쳐서 관심을 끈다", s: {Lonely: 4, Naive: 2}}, {t: "큰 소리로 좋아해! 라고 외친다", s: {Brave: 4, Impish: 4, Bold: 2}}, {t: "두려워서 아무것도 못 한다", s: {Timid: 2}}] },
+            { q: "깜짝 인터뷰를 받았다! 너는 어떻게 하겠는가?", a: [{t: "부끄러워서 도망친다", s: {Timid: 4}}, {t: "당당하게 대답한다", s: {Brave: 4, Sassy: 4}}, {t: "OO야 보고 있니~?", s: {Naive: 4, Bold: 2}}] },
             { q: "기쁜 일이 있으면 무심코 춤을 추는가?", a: [{t: "예", s: {Jolly: 4, Lonely: 2}}, {t: "아니오", s: {Calm: 2}}] },
+            { q: "저편에서 퍼레이드가 다가온다. 너는?", a: [{t: "옆에서 지켜본다", s: {Calm: 2}}, {t: "함께 행진한다", s: {Jolly: 4, Naive: 4}}, {t: "별로 신경 쓰지 않는다", s: {Sassy: 4, Lonely: 2}}] },
             { q: "친구가 썰렁 개그를 말했다. 너는...", a: [{t: "꺄하하! 박장대소!", s: {Jolly: 4, Naive: 2}}, {t: "못 들은 척한다", s: {Impish: 2, Docile: 2}}, {t: "누가 어떻게 좀 해봐!", s: {Brave: 4}}] },
+            { q: "모르는 사람에게도 쉽게 말을 거는가?", a: [{t: "예", s: {Jolly: 4}}, {t: "아니오", s: {Bold: 4, Timid: 2, Docile: 2}}] },
             { q: "자주 다치는 타입인가?", a: [{t: "예", s: {Impish: 4, Rash: 4}}, {t: "아니오", s: {Calm: 2}}] },
+            { q: "둥근 공을 보면 무심코...", a: [{t: "차고 싶어진다", s: {Hasty: 2, Sassy: 2}}, {t: "던지고 싶어진다", s: {Impish: 4}}, {t: "문지르고 싶어진다", s: {Lonely: 4}}] },
             { q: "정글 탐험을 하고 싶은가?", a: [{t: "예", s: {Impish: 4, Naive: 2}}, {t: "아니오", s: {Quirky: 4, Timid: 2}}] },
+            { q: "지하실에서 비밀 계단을 발견했다! 너는...", a: [{t: "내려가 본다", s: {Impish: 4, Brave: 4, Rash: 2, Hasty: 2}}, {t: "일단 내버려 둔다", s: {Timid: 2}}] },
             { q: "친구가 심하게 자빠졌다! 너는?", a: [{t: "바로 도와준다", s: {Brave: 4, Lonely: 2}}, {t: "나도 모르게 웃는다", s: {Naive: 4, Impish: 4, Rash: 2}}] },
+            { q: "진심으로 외계인을 불러내려고 한 적이 있는가?", a: [{t: "있다", s: {Naive: 4}}, {t: "없다", s: {Quiet: 2}}] },
             { q: "농담으로 친구를 놀리다가 울려버린 적이 있는가?", a: [{t: "예", s: {Naive: 4}}, {t: "아니오", s: {Calm: 4}}] },
-            { q: "너의 뒤에 누군가 있다... (방금 뒤를 돌아봤나?)", a: [{t: "무서우니까 그만둬!", s: {Timid: 4}}, {t: "뭐야 속인 거군!", s: {Docile: 4}}, {t: "엥 뭐야?", s: {Relaxed: 4}}] },
-            { q: "가게 점원이 상품을 권해온다. 너는?", a: [{t: "단호하게 거절한다", s: {Brave: 2, Quiet: 2}}, {t: "부드럽게 거절한다", s: {Calm: 4}}, {t: "아무 말 못하고 사버린다", s: {Rash: 2, Timid: 2}}] },
-            { q: "누가 부른 것 같은데 아무도 없다. 무엇이라 생각하나?", a: [{t: "분명 기분 탓", s: {Relaxed: 4}}, {t: "혹시... 귀신?", s: {Timid: 4}}] },
+            { q: "너의 뒤에 누군가 있다... (방금 뒤를 돌아봤나?)", a: [{t: "무서우니까 그만둬!", s: {Timid: 4}}, {t: "뭐야 속인 거군!", s: {Docile: 4}}, {t: "그 수법엔 안 속아!", s: {Sassy: 4, Lonely: 4}}, {t: "엥 뭐야?", s: {Relaxed: 4}}] },
+            { q: "가게 점원이 그저 그런 상품을 권해온다. 너는?", a: [{t: "단호하게 거절한다", s: {Brave: 2, Quiet: 2}}, {t: "부드럽게 거절한다", s: {Calm: 4, Lonely: 2}}, {t: "아무 말 못하고 사버린다", s: {Rash: 2, Timid: 2}}] },
+            { q: "서먹한 친구와 둘만 남게 되었다. 너는?", a: [{t: "쓸데없는 이야기를 한다", s: {Calm: 2}}, {t: "아무 말도 하지 않는다", s: {Quirky: 2}}, {t: "이유를 만들어 도망친다", s: {Timid: 4}}] },
+            { q: "누가 부른 것 같은데 아무도 없다. 무엇이라 생각하나?", a: [{t: "분명 기분 탓", s: {Relaxed: 4}}, {t: "누군가의 장난", s: {Naive: 4, Bold: 2}}, {t: "혹시... 귀신?", s: {Timid: 4}}] },
+            { q: "착각할 때가 자주 있는가?", a: [{t: "예", s: {Hasty: 4, Rash: 4}}, {t: "아니오", s: {Docile: 2, Quiet: 2}}] },
             { q: "TV 채널을 자주 바꾸는가?", a: [{t: "예", s: {Hasty: 4}}, {t: "아니오", s: {Calm: 2}}] },
-            { q: "싸고 질 좋은 상품을 발견했다!", a: [{t: "바로 사버린다!", s: {Hasty: 4}}, {t: "정말 필요한지 생각한다", s: {Quiet: 2}}] },
-            { q: "항상 남보다 앞서가고 싶은가?", a: [{t: "예", s: {Sassy: 4, Lonely: 2}}, {t: "아니오", s: {Calm: 4}}] },
+            { q: "싸고 질 좋은 상품을 발견했다!", a: [{t: "바로 사버린다!", s: {Hasty: 4}}, {t: "정말 필요한지 생각한다", s: {Quiet: 2}}, {t: "가격을 더 깎는다", s: {Bold: 4}}] },
+            { q: "소풍 과자가 너무 먹고 싶다!", a: [{t: "조금만 먹는다", s: {Hasty: 4}}, {t: "꾹 참는다", s: {Hardy: 4}}, {t: "정신차려보니 다 먹었다", s: {Rash: 4}}] },
+            { q: "잘난 체 하는 사람을 보면 반발심이 생기나?", a: [{t: "예", s: {Sassy: 4}}, {t: "아니오", s: {Calm: 2}}] },
+            { q: "항상 남보다 앞서가고 싶은가?", a: [{t: "예", s: {Sassy: 4, Lonely: 2}}, {t: "아니오", s: {Calm: 4, Quirky: 2}}] },
+            { q: "나는 혹시 천재? 라고 생각한 적이 있다.", a: [{t: "예", s: {Sassy: 4, Naive: 2, Jolly: 2}}, {t: "아니오", s: {Hardy: 2}}] },
+            { q: "손윗사람에게 의견을 확실히 말하나?", a: [{t: "예", s: {Sassy: 4, Brave: 4, Bold: 2}}, {t: "아니오", s: {Timid: 2}}] },
             { q: "도시와 시골 중 어느 쪽이 좋은가?", a: [{t: "도시", s: {Lonely: 4, Sassy: 2}}, {t: "시골", s: {Calm: 4}}, {t: "어느 쪽이든 좋다", s: {Quirky: 4}}] },
-            { q: "남은 만두 1개를 친구가 먹어버렸다!", a: [{t: "뭐 괜찮아", s: {Calm: 4}}, {t: "분노 폭발!", s: {Relaxed: 4, Jolly: 4}}] },
-            { q: "도미노를 거의 다 쌓았는데 쓰러뜨렸다!", a: [{t: "충격으로 멍해진다", s: {Hardy: 4}}, {t: "분노 폭발!", s: {Docile: 4}}, {t: "다시 쌓기 시작한다", s: {Calm: 4}}] },
+            { q: "남은 만두 1개를 친구가 먹어버렸다!", a: [{t: "뭐 괜찮아", s: {Calm: 4}}, {t: "분노 폭발!", s: {Relaxed: 4, Jolly: 4}}, {t: "슬퍼서 운다", s: {Lonely: 4}}] },
+            { q: "도미노를 거의 다 쌓았는데 쓰러뜨렸다!", a: [{t: "충격으로 멍해진다", s: {Hardy: 4}}, {t: "분노 폭발!", s: {Docile: 4}}, {t: "다시 쌓기 시작한다", s: {Calm: 4, Bold: 4}}] },
+            { q: "주위가 소란스러워도 신경 쓰이지 않나?", a: [{t: "예", s: {Bold: 4, Relaxed: 2}}, {t: "아니오", s: {Lonely: 4, Hasty: 2}}] },
+            { q: "배부른데 좋아하는 디저트가 나왔다!", a: [{t: "무리해서 먹는다", s: {Hasty: 4, Rash: 2}}, {t: "그만둔다", s: {Hardy: 2}}, {t: "디저트 배는 따로 있다!", s: {Bold: 4, Jolly: 4, Relaxed: 2}}] },
             { q: "내일은 중요한 시험이다!", a: [{t: "밤새워 공부한다", s: {Hardy: 4}}, {t: "어떻게든 되겠지", s: {Relaxed: 4}}, {t: "왠지 열이 나는데?", s: {Naive: 4}}] },
-            { q: "전화가 왔다! 너는?", a: [{t: "서둘러 받는다", s: {Hasty: 4, Lonely: 4}}, {t: "조금 기다렸다 받는다", s: {Quiet: 2}}] },
-            { q: "아무것도 없는 방에서 기다려야 한다면?", a: [{t: "얌전히 기다린다", s: {Docile: 4}}, {t: "무심코 나가버린다", s: {Rash: 4}}, {t: "구석에 웅크려 앉는다", s: {Lonely: 4}}] },
-            { q: "계획대로 행동하는가?", a: [{t: "그런 편이다", s: {Hardy: 4}}, {t: "계획은 안 세운다", s: {Relaxed: 4}}] },
+            { q: "레스토랑에서 갑자기 사람들이 사라졌다!", a: [{t: "점원을 찾는다", s: {Lonely: 4, Docile: 4}}, {t: "계속 먹는다", s: {Jolly: 4, Relaxed: 4}}, {t: "남은 음식을 먹는다", s: {Bold: 4}}] },
+            { q: "정신 차려보니 콧노래를 부를 때가 있나?", a: [{t: "예", s: {Relaxed: 4}}, {t: "아니오", s: {Quiet: 2}}] },
+            { q: "전화가 왔다! 너는?", a: [{t: "서둘러 받는다", s: {Hasty: 4, Lonely: 4}}, {t: "조금 기다렸다 받는다", s: {Quiet: 2}}, {t: "일부러 안 받는다", s: {Timid: 2}}] },
+            { q: "친구가 즐겁게 대화하고 있다. 너는?", a: [{t: "궁금해서 다가간다", s: {Naive: 4}}, {t: "신경 쓰지 않는다", s: {Lonely: 4}}, {t: "귀를 기울인다", s: {Timid: 2}}] },
+            { q: "주목받는 것을 좋아하는가?", a: [{t: "예", s: {Lonely: 4, Sassy: 4}}, {t: "아니오", s: {Relaxed: 2}}] },
+            { q: "아무것도 없는 방에서 기다려야 한다면?", a: [{t: "얌전히 기다린다", s: {Docile: 4}}, {t: "뭔가 없는지 찾는다", s: {Naive: 4}}, {t: "무심코 나가버린다", s: {Rash: 4}}, {t: "구석에 웅크려 앉는다", s: {Lonely: 4}}] },
+            { q: "사놓고 안 쓰는 물건이 많은가?", a: [{t: "예", s: {Quirky: 4, Rash: 2, Hasty: 2}}, {t: "아니오", s: {Quiet: 2}}] },
+            { q: "꾸준히 하는 취미가 있는가?", a: [{t: "있다", s: {Hardy: 4}}, {t: "없다", s: {Quirky: 4, Hasty: 2}}] },
+            { q: "약속을 직전에 취소한 적이 있나?", a: [{t: "있다", s: {Quirky: 4, Rash: 4}}, {t: "없다", s: {Calm: 2}}] },
+            { q: "계획대로 행동하는가?", a: [{t: "그런 편이다", s: {Hardy: 4}}, {t: "잘 안 된다", s: {Quirky: 4, Rash: 2}}, {t: "계획은 안 세운다", s: {Relaxed: 4}}] },
+            { q: "때로는 거짓말도 필요하다고 생각하나?", a: [{t: "예", s: {Quiet: 4, Bold: 4}}, {t: "아니오", s: {Brave: 4}}, {t: "모른다", s: {Docile: 4}}] },
             { q: "유령선 안에는 무엇이 있을까?", a: [{t: "보물!", s: {Naive: 4, Jolly: 2}}, {t: "귀신 가득", s: {Timid: 2}}, {t: "환상일 뿐", s: {Quiet: 4}}] },
             { q: "이기기 위해선 무슨 짓이든 해도 되나?", a: [{t: "그렇다", s: {Quiet: 4, Sassy: 4}}, {t: "아니다", s: {Brave: 4}}] },
+            { q: "친구가 울고 있다. 이유는?", a: [{t: "누가 괴롭혔다", s: {Hasty: 4}}, {t: "넘어졌다", s: {Quiet: 4}}, {t: "나 때문인가?", s: {Timid: 2}}] },
             { q: "문단속을 잊고 외출한 적이 있나?", a: [{t: "있다", s: {Rash: 4, Bold: 2}}, {t: "없다", s: {Quiet: 2}}] },
-            { q: "하루 지난 케이크가 있다!", a: [{t: "그냥 먹는다", s: {Brave: 4, Relaxed: 2}}, {t: "고민하다 안 먹는다", s: {Timid: 2}}] },
-            { q: "수업 중 화장실에 가고 싶다면?", a: [{t: "손들고 간다", s: {Brave: 4, Bold: 4}}, {t: "필사적으로 참는다", s: {Timid: 2}}] }
+            { q: "친구 집에서 저녁을 먹는다!", a: [{t: "마구 먹는다", s: {Impish: 4, Naive: 4}}, {t: "주저하며 먹는다", s: {Hardy: 2}}, {t: "남은 거 싸달라고 한다", s: {Bold: 4}}] },
+            { q: "무거운 짐이 있다면?", a: [{t: "혼자 옮긴다", s: {Hardy: 4, Brave: 2}}, {t: "도움을 받는다", s: {Docile: 2}}, {t: "남에게 시킨다", s: {Bold: 4, Sassy: 2}}] },
+            { q: "공동묘지에 젖은 여자가 서 있다!", a: [{t: "도망친다", s: {Timid: 2}}, {t: "변장이지?", s: {Naive: 4, Sassy: 2}}, {t: "죽은 척한다", s: {Rash: 4}}] },
+            { q: "하루 지난 케이크가 있다!", a: [{t: "그냥 먹는다", s: {Brave: 4, Relaxed: 2}}, {t: "고민하다 안 먹는다", s: {Timid: 2}}, {t: "남 먹여본다", s: {Bold: 4}}] },
+            { q: "셔츠를 뒤집어 입었다는 소리를 들었다!", a: [{t: "동요한다", s: {Docile: 4}}, {t: "크게 웃는다", s: {Rash: 4}}, {t: "얼버무린다", s: {Jolly: 4}}] },
+            { q: "누가 물을 끼얹었다!", a: [{t: "화낸다", s: {Hasty: 4}}, {t: "운다", s: {Lonely: 4}}, {t: "물싸움이다!", s: {Jolly: 4, Naive: 4, Impish: 4}}] },
+            { q: "연극에서 맡고 싶은 역할은?", a: [{t: "주연", s: {Bold: 4}}, {t: "조연", s: {Jolly: 4}}, {t: "단역", s: {Quirky: 4}}] },
+            { q: "수업 중 화장실에 가고 싶다면?", a: [{t: "손들고 간다", s: {Brave: 4, Bold: 4}}, {t: "몰래 간다", s: {Hasty: 2}}, {t: "필사적으로 참는다", s: {Timid: 2}}] },
+            { q: "마라톤 골인 직전! 너무 괴롭다면?", a: [{t: "끝까지 완주", s: {Hardy: 4, Brave: 2}}, {t: "포기한다", s: {Quirky: 4}}, {t: "지름길로 간다", s: {Bold: 4, Rash: 2}}] },
+            { q: "길에서 좋은 냄새가 난다!", a: [{t: "상상한다", s: {Docile: 4}}, {t: "냄새를 따라간다", s: {Naive: 4, Rash: 2}}, {t: "배가 고파진다", s: {Impish: 4}}] }
         ],
-        introTexts: ["어서 오너라!", "여기는 포켓몬들의 세계로\n통하는 입구다!", "모험에 나서기 전에\n너에게 몇 가지 질문이 있다.", "솔직하게 대답해 주길 바란다.", "준비는 되었는가?", "그럼... 질문 시작하겠다!"],
+        introTexts: ["어서 오너라!", "여기는 포켓몬들의 세계로\n통하는 입구다!", "이 문 너머에는 네가 상상하지 못한\n다양한 모험이 기다리고 있을 것이다!", "솔직하게 대답해 주길 바란다.", "준비는 되었는가?", "그럼... 질문 시작하겠다!"],
         
         natureMap: { Lonely: "고독한", Docile: "온순한", Quirky: "변덕스러운", Brave: "용감한", Sassy: "건방진", Calm: "차분한", Timid: "소심한", Jolly: "유쾌한", Quiet: "내성적", Hardy: "강건한", Rash: "무모한", Hasty: "조급한", Bold: "과감한", Naive: "순진한", Impish: "장난꾸러기", Relaxed: "느긋한" },
         pokemonMap: { 
@@ -218,7 +191,7 @@
         pokeIdMap: { "아차모": 255, "파이리": 4, "피카츄": 25, "리아코": 158, "팽도리": 393, "불꽃숭이": 390, "모부기": 387, "브케인": 155, "에나비": 300, "냐옹": 52, "나무지기": 252, "먹고자": 446, "물짱이": 258, "꼬부기": 7, "이상해씨": 1, "치코리타": 152, "식스테일": 37 },
         waveColors: { Hardy: "#ff4d4d", Brave: "#ff4d4d", Rash: "#ff4d4d", Jolly: "#ff80df", Naive: "#ff80df", Relaxed: "#33ccff", Quiet: "#33ccff", Calm: "#3366ff", Timid: "#ffa31a", Hasty: "#ffa31a", Sassy: "#cc66ff", Quirky: "#cc66ff", Bold: "#ffff33", Impish: "#ffff33", Docile: "#38f838", Lonely: "#38f838" },
 
-        state: { typingTimer: null, isTyping: false, currentFullText: "", introIdx: 0, currentIdx: 0, scores: {}, testPool: [], userGender: 'male', finalNature: "", userChoices: [], player: null, isProcessing: false, ringInterval: null },
+        state: { typingTimer: null, isTyping: false, introIdx: 0, currentIdx: 0, scores: {}, testPool: [], userGender: 'male', finalNature: "", userChoices: [], player: null, ringInterval: null, isProcessing: false },
 
         init() {
             this.dom = {
@@ -228,74 +201,49 @@
                 answerBox: document.getElementById("answer-box"),
                 progressFill: document.getElementById("progress-fill"),
                 stepCount: document.getElementById("step-count"),
-                volumeSlider: document.getElementById("volume-slider"),
-                muteBtn: document.getElementById("mute-btn"),
                 waveLayer: document.getElementById("wave-layer"),
                 waveMsg: document.getElementById("wave-msg"),
                 waveTrigger: document.getElementById("wave-trigger"),
-                waveFill: document.getElementById("wave-fill")
+                waveFill: document.getElementById("wave-fill"),
+                waveNextBtn: document.getElementById("wave-next-btn")
             };
 
-            // YouTube API 초기화
             window.onYouTubeIframeAPIReady = () => {
                 this.state.player = new YT.Player('player', {
                     videoId: 'ehI75lWfXhw',
-                    playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'controls': 0, 'disablekb': 1, 'playsinline': 1 },
-                    events: { 'onReady': (e) => e.target.setVolume(this.dom.volumeSlider.value) }
+                    playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'ehI75lWfXhw', 'controls': 0, 'playsinline': 1 },
+                    events: { 'onReady': (e) => e.target.setVolume(document.getElementById("volume-slider").value) }
                 });
             };
 
-            document.getElementById("intro-next-btn").onclick = (e) => { e.stopPropagation(); this.handleIntroNext(); };
-            this.dom.volumeSlider.oninput = (e) => { if (this.state.player) this.state.player.setVolume(e.target.value); };
-            this.dom.muteBtn.onclick = (e) => { e.stopPropagation(); this.toggleMute(); };
+            document.getElementById("intro-next-btn").onclick = () => this.handleIntroNext();
+            document.getElementById("volume-slider").oninput = (e) => this.state.player?.setVolume(e.target.value);
+            document.getElementById("mute-btn").onclick = () => this.toggleMute();
+            if(this.dom.waveNextBtn) this.dom.waveNextBtn.onclick = () => this.goToResult();
             
-            this.typeWriter("... (아래 버튼을 눌러 시작하세요)", "intro-text");
+            this.typeWriter("... (다음 버튼을 눌러 시작하세요)", "intro-text");
         },
 
         typeWriter(text, elementId, callback) {
             clearTimeout(this.state.typingTimer);
             this.state.isTyping = true;
-            this.state.currentFullText = text;
             const el = document.getElementById(elementId);
-            if (!el) return;
             el.innerText = "";
             el.parentElement.classList.remove('cursor');
             let i = 0;
             const self = this;
             function type() {
-                if (i < text.length) {
-                    el.append(text.charAt(i));
-                    i++;
-                    self.state.typingTimer = setTimeout(type, 45);
-                } else {
-                    self.state.isTyping = false;
-                    el.parentElement.classList.add('cursor');
-                    if (callback) callback();
-                }
+                if (i < text.length) { el.append(text.charAt(i++)); self.state.typingTimer = setTimeout(type, 40); }
+                else { self.state.isTyping = false; el.parentElement.classList.add('cursor'); if (callback) callback(); }
             }
             type();
         },
 
-        skipTypewriter() {
-            if (!this.state.isTyping) return;
-            clearTimeout(this.state.typingTimer);
-            this.state.isTyping = false;
-            const el = this.dom.textDisplay.innerText ? this.dom.textDisplay : document.getElementById("intro-text");
-            if (el) { el.innerText = this.state.currentFullText; el.parentElement.classList.add('cursor'); }
-        },
-
         handleIntroNext() {
-            if (this.state.isTyping) { this.skipTypewriter(); return; }
+            if (this.state.isTyping) return;
             if (this.state.introIdx === 0 && this.state.player?.playVideo) this.state.player.playVideo();
-            
-            if (this.state.introIdx < this.introTexts.length) {
-                this.typeWriter(this.introTexts[this.state.introIdx], "intro-text");
-                this.state.introIdx++;
-            } else {
-                this.dom.introLayer.classList.add("hidden");
-                this.dom.gameContainer.classList.remove("hidden");
-                this.startTest();
-            }
+            if (this.state.introIdx < this.introTexts.length) { this.typeWriter(this.introTexts[this.state.introIdx++], "intro-text"); }
+            else { this.dom.introLayer.classList.add("hidden"); this.dom.gameContainer.classList.remove("hidden"); this.startTest(); }
         },
 
         startTest() {
@@ -310,25 +258,22 @@
             if (this.state.currentIdx >= this.state.testPool.length) { this.askGender(); return; }
             const data = this.state.testPool[this.state.currentIdx];
             this.dom.answerBox.innerHTML = "";
-            this.dom.stepCount.innerText = `${this.state.currentIdx + 1} / ${this.state.testPool.length}`;
-            this.dom.progressFill.style.width = `${((this.state.currentIdx + 1) / this.state.testPool.length) * 100}%`;
+            this.dom.stepCount.innerText = `${this.state.currentIdx + 1} / 20`;
+            this.dom.progressFill.style.width = `${((this.state.currentIdx + 1) / 20) * 100}%`;
             
             this.typeWriter(data.q, "text-display", () => {
                 data.a.forEach(ans => {
                     const btn = document.createElement("button");
                     btn.className = "btn-choice";
                     btn.innerText = ans.t;
-                    btn.onclick = (e) => {
-                        e.stopPropagation();
-                        if (this.state.isProcessing) return;
+                    btn.onclick = () => {
+                        if(this.state.isProcessing) return;
                         this.state.isProcessing = true;
-                        
                         for (let s in ans.s) this.state.scores[s] = (this.state.scores[s] || 0) + ans.s[s];
                         this.state.userChoices.push({ q: data.q, a: ans.t });
-                        this.state.currentIdx++;
+                        this.state.currentIdx++; 
                         this.renderQuestion();
-                        
-                        setTimeout(() => this.state.isProcessing = false, 200);
+                        setTimeout(() => this.state.isProcessing = false, 250);
                     };
                     this.dom.answerBox.appendChild(btn);
                 });
@@ -337,169 +282,109 @@
 
         askGender() {
             this.dom.answerBox.innerHTML = "";
-            this.dom.stepCount.innerText = "Last Step";
-            this.dom.progressFill.style.width = "100%";
-            this.typeWriter("모든 질문이 끝났다. 마지막으로 확인해 두마.\n너는 남자와 여자 중에서 어느 쪽?", "text-display", () => {
+            this.typeWriter("모든 질문이 끝났다.\n너는 남자와 여자 중에서 어느 쪽?", "text-display", () => {
                 [{t: "남자", v: "male"}, {t: "여자", v: "female"}].forEach(g => {
-                    const btn = document.createElement("button");
-                    btn.className = "btn-choice";
-                    btn.innerText = g.t;
-                    btn.onclick = (e) => {
-                        e.stopPropagation();
-                        this.state.userGender = g.v;
-                        this.calculateResult();
-                        this.startWaveScan();
-                    };
+                    const btn = document.createElement("button"); btn.className = "btn-choice"; btn.innerText = g.t;
+                    btn.onclick = () => { this.state.userGender = g.v; this.calculateResult(); this.startWaveScan(); };
                     this.dom.answerBox.appendChild(btn);
                 });
             });
         },
 
         calculateResult() {
-            const maxScore = Math.max(...Object.values(this.state.scores));
-            const winners = Object.keys(this.state.scores).filter(k => this.state.scores[k] === maxScore);
-            // 동점자 발생 시 랜덤 선택
+            const max = Math.max(...Object.values(this.state.scores));
+            const winners = Object.keys(this.state.scores).filter(k => this.state.scores[k] === max);
             this.state.finalNature = winners[Math.floor(Math.random() * winners.length)];
-            const color = this.waveColors[this.state.finalNature];
-            document.documentElement.style.setProperty('--wave-color', color);
+            document.documentElement.style.setProperty('--wave-color', this.waveColors[this.state.finalNature]);
         },
 
         startWaveScan() {
-            this.dom.gameContainer.classList.add("hidden");
-            this.dom.waveLayer.classList.remove("hidden");
-            const scanTexts = ["진단이 끝났습니다...", "이제 당신의 파동을 감지하겠습니다.", "화면의 버튼에 손가락을 대고...", "마음을 차분히 가라앉히세요."];
-            let sIdx = 0;
-            const showScanIntro = () => {
-                if (sIdx < scanTexts.length) {
-                    this.dom.waveMsg.innerText = scanTexts[sIdx];
-                    sIdx++;
-                    setTimeout(showScanIntro, 1800);
-                } else {
-                    this.dom.waveMsg.innerHTML = "당신의 파동을 전달해 주세요...<br>(PUSH 버튼을 길게 누르세요)";
-                    this.dom.waveTrigger.classList.remove("hidden");
-                    this.dom.waveTrigger.classList.add("anim-pulse");
-                    this.setupWaveEvent();
+            this.dom.gameContainer.classList.add("hidden"); this.dom.waveLayer.classList.remove("hidden");
+            let sIdx = 0; const scanTexts = ["진단이 끝났습니다...", "이제 당신의 파동을 감지하겠습니다.", "마음을 차분히 가라앉히세요."];
+            const showScan = () => {
+                if (sIdx < scanTexts.length) { this.dom.waveMsg.innerText = scanTexts[sIdx++]; setTimeout(showScan, 1800); }
+                else { 
+                    this.dom.waveMsg.innerHTML = "당신의 파동을 전달해 주세요...<br>(PUSH 버튼을 길게 누르세요)"; 
+                    this.dom.waveTrigger.classList.remove("hidden"); 
+                    this.setupWave(); 
                 }
             };
-            showScanIntro();
+            showScan();
         },
 
-        spawnRing() {
-            const ring = document.createElement("div");
-            ring.className = "wave-ring";
-            ring.style.borderColor = this.waveColors[this.state.finalNature] || "#fff";
-            this.dom.waveTrigger.appendChild(ring);
-            setTimeout(() => ring.remove(), 2800);
-        },
-
-        setupWaveEvent() {
-            let pressTimer = null;
-            let progress = 0;
-            const trigger = this.dom.waveTrigger;
-            const fill = this.dom.waveFill;
-
+        setupWave() {
+            let progress = 0; let pressTimer = null;
             const onStart = (e) => {
-                e.preventDefault();
-                if (pressTimer) return;
-                trigger.classList.remove("anim-pulse");
-                
-                this.spawnRing();
-                this.state.ringInterval = setInterval(() => this.spawnRing(), 700);
-
+                e.preventDefault(); if (pressTimer) return;
+                this.state.ringInterval = setInterval(() => {
+                    const ring = document.createElement("div"); ring.className = "wave-ring";
+                    ring.style.borderColor = this.waveColors[this.state.finalNature];
+                    this.dom.waveTrigger.appendChild(ring); setTimeout(() => ring.remove(), 2500);
+                }, 600);
                 pressTimer = setInterval(() => {
-                    progress += 1.6;
-                    fill.style.height = Math.min(progress, 100) + "%";
-                    if (navigator.vibrate) navigator.vibrate(12);
-                    if (progress >= 100) { clearInterval(pressTimer); completeScan(); }
+                    progress += 1.8;
+                    this.dom.waveFill.style.width = Math.min(progress, 110) + "%";
+                    this.dom.waveFill.style.height = Math.min(progress, 110) + "%";
+                    if (navigator.vibrate) navigator.vibrate(10);
+                    if (progress >= 100) { clearInterval(pressTimer); clearInterval(this.state.ringInterval); this.completeWave(); }
                 }, 35);
             };
+            const onEnd = () => { if(progress < 100) { clearInterval(pressTimer); clearInterval(this.state.ringInterval); pressTimer = null; progress = 0; this.dom.waveFill.style.width = "0%"; this.dom.waveFill.style.height = "0%"; } };
+            this.dom.waveTrigger.onpointerdown = onStart; window.onpointerup = onEnd;
+            this.dom.waveTrigger.ontouchstart = onStart; window.ontouchend = onEnd;
+        },
 
-            const onEnd = () => { 
-                if(progress < 100) { 
-                    clearInterval(pressTimer); 
-                    clearInterval(this.state.ringInterval);
-                    pressTimer = null; 
-                    progress = 0; 
-                    fill.style.height = "0%"; 
-                    trigger.classList.add("anim-pulse"); 
-                } 
-            };
+        completeWave() {
+            this.dom.waveTrigger.classList.add("hidden");
+            this.dom.waveMsg.innerHTML = `<span style="color:var(--accent-yellow)">너의 파동을 알았다.</span><br>당신의 기운이 느껴집니다...`;
+            const btn = document.getElementById("wave-next-btn");
+            if(btn) btn.classList.remove("hidden");
+        },
 
-            const completeScan = () => {
-                clearInterval(this.state.ringInterval);
-                trigger.onpointerdown = trigger.ontouchstart = null;
-                this.dom.waveMsg.style.opacity = "0";
-                setTimeout(() => {
-                    this.dom.waveMsg.innerHTML = `<span style="color:var(--accent-yellow)">너의 파동을 알았다.</span><br>당신의 기운이 느껴집니다...`;
-                    this.dom.waveMsg.style.opacity = "1";
-                    setTimeout(() => {
-                        this.dom.waveLayer.style.opacity = "0";
-                        setTimeout(() => {
-                            this.dom.waveLayer.classList.add("hidden");
-                            this.dom.gameContainer.classList.remove("hidden");
-                            this.showResult();
-                        }, 1000);
-                    }, 2000);
-                }, 500);
-            };
-
-            trigger.onpointerdown = onStart; window.onpointerup = onEnd; 
-            trigger.ontouchstart = onStart; window.ontouchend = onEnd;
+        goToResult() {
+            this.dom.waveLayer.style.opacity = "0";
+            setTimeout(() => {
+                this.dom.waveLayer.classList.add("hidden");
+                this.dom.gameContainer.classList.remove("hidden");
+                document.getElementById("testing-ui").classList.add("hidden");
+                this.showResult();
+            }, 800);
         },
 
         showResult() {
-            document.getElementById("testing-ui").classList.add("hidden");
-            const resUi = document.getElementById("result-ui");
-            const resDisplay = document.getElementById("result-display");
-            resUi.classList.remove("hidden");
-
-            const natureName = this.natureMap[this.state.finalNature];
-            const resultName = this.pokemonMap[this.state.userGender][this.state.finalNature];
-            const pokeId = this.pokeIdMap[resultName];
-            const sampled = [...this.state.userChoices].sort(() => 0.5 - Math.random()).slice(0, 2);
-
-            this.typeWriter(`...너의 선택들을 곰곰이 지켜보았단다.`, "result-display", () => {
-                setTimeout(() => {
-                    resDisplay.innerHTML = `
-                        <div class="result-layout">
-                            <div class="result-desc">
-                                너는 질문 중 하나였던<br>'<span style="color:var(--wave-color)">${sampled[0].q}</span>'에 대해<br> '${sampled[0].a}'라고 말했었지.<br><br>
-                                그걸 보니 너는 아무래도...<br>
-                                [<span style="color:var(--accent-yellow)">${natureName}</span>] 성격인 거 같아.
-                            </div>
-                            <div class="result-nature-tag">그런 당신과 닮은 포켓몬은...</div>
-                            <div class="result-poke-name">${resultName}!</div>
-                            <div class="img-container">
-                                <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png" alt="result">
-                            </div>
-                            <button class="btn-center" onclick="location.reload()"><span>▶</span> 다시 하기</button>
-                            <button class="btn-center" id="share-btn" style="background:rgba(56,248,56,0.15); border-color:var(--wave-color); margin-top:12px;"><span>▶</span> 결과 공유하기</button>
-                        </div>
-                    `;
-                    const img = document.getElementById("pokemon-img");
-                    img.onload = () => img.style.opacity = 1;
-                    document.getElementById("share-btn").onclick = () => this.shareResult(natureName, resultName);
-                }, 1000);
-            });
+            const resUi = document.getElementById("result-ui"); resUi.classList.remove("hidden");
+            const nature = this.natureMap[this.state.finalNature];
+            const poke = this.pokemonMap[this.state.userGender][this.state.finalNature];
+            const sampled = this.state.userChoices.sort(() => 0.5 - Math.random()).slice(0, 2);
+            document.getElementById("result-display").innerHTML = `
+                <div class="result-layout">
+                    <div class="result-desc">
+                        너는 질문 중 '${sampled[0].q}'에 대해<br>'${sampled[0].a}'라고 했지.<br><br>
+                        그걸 보니 너는 [<span style="color:var(--accent-yellow)">${nature}</span>] 성격인 것 같아.
+                    </div>
+                    <div class="result-nature-tag">당신과 닮은 포켓몬은...</div>
+                    <div class="result-poke-name">${poke}!</div>
+                    <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${this.pokeIdMap[poke]}.png">
+                    <button class="btn-center" onclick="location.reload()"><span>▶</span> 다시 하기</button>
+                    <button class="btn-center" id="share-btn" style="background:rgba(56,248,56,0.15); border-color:var(--wave-color); margin-top:10px;"><span>▶</span> 결과 공유하기</button>
+                </div>
+            `;
+            const img = document.getElementById("pokemon-img");
+            img.onload = () => img.style.opacity = 1;
+            document.getElementById("share-btn").onclick = () => this.shareResult(nature, poke);
         },
 
         async shareResult(nature, poke) {
-            const text = `[포켓몬 성격 테스트]\n나의 성격: ${nature}\n닮은 포켓몬: ${poke}\n테스트 하러가기: ${window.location.href}`;
-            if (navigator.share) {
-                try { await navigator.share({ title: '포켓몬 성격 테스트', text: text, url: window.location.href }); } catch (err) {}
-            } else {
-                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
-            }
+            const text = `[포켓몬 성격 테스트]\n나의 성격: ${nature}\n닮은 포켓몬: ${poke}\n테스트 하기: ${window.location.href}`;
+            if (navigator.share) { try { await navigator.share({ title: '성격 테스트', text, url: window.location.href }); } catch (err) {} }
+            else { navigator.clipboard.writeText(text).then(() => alert("복사되었습니다!")); }
         },
 
         toggleMute() {
-            if (!this.state.player) return;
-            const icon = this.dom.muteBtn;
-            if (this.state.player.isMuted()) { this.state.player.unMute(); icon.innerText = "🔊"; } 
-            else { this.state.player.mute(); icon.innerText = "🔇"; }
+            if (this.state.player?.isMuted()) { this.state.player.unMute(); document.getElementById("mute-btn").innerText = "🔊"; }
+            else { this.state.player?.mute(); document.getElementById("mute-btn").innerText = "🔇"; }
         }
     };
-
     window.onload = () => App.init();
 </script>
 </body>
