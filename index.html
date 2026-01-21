@@ -25,7 +25,7 @@
         .window { background: var(--window-bg); border: 4px solid var(--border-green); border-radius: 12px; box-shadow: 0 0 25px rgba(0,0,0,0.8); padding: 24px; position: relative; }
 
         /* 인트로 & UI */
-        #intro-layer { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        #intro-layer { position: fixed; inset: 0; background: #000; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
         #intro-text-box { min-height: 160px; display: flex; align-items: center; justify-content: center; text-align: center; }
         #intro-text { font-size: 1.3rem; line-height: 1.8; word-break: keep-all; max-width: 85%; }
         
@@ -44,26 +44,26 @@
         #progress-fill { height: 100%; background: linear-gradient(90deg, #166534, var(--border-green)); width: 0%; transition: width 0.3s; }
         
         /* 파동 레이어 */
-        #wave-layer { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; color: #fff; transition: opacity 0.8s; }
-        #wave-msg { font-size: 1.35rem; font-weight: bold; padding: 0 40px; line-height: 1.8; min-height: 120px; text-shadow: 2px 2px 10px #000; z-index: 2005; pointer-events: none; }
+        #wave-layer { position: fixed; inset: 0; background: radial-gradient(circle at center, rgba(0,0,0,0.8) 0%, #000 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; color: #fff; transition: opacity 0.8s; }
+        #wave-msg { font-size: 1.35rem; font-weight: bold; padding: 0 40px; line-height: 1.8; min-height: 120px; text-shadow: 2px 2px 10px #000; z-index: 2100; pointer-events: none; }
         
         /* PUSH 버튼 (중앙 충전형) */
-        .wave-circle { width: 160px; height: 160px; border: 6px solid #fff; border-radius: 50%; margin-top: 30px; position: relative; display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.05); z-index: 2010; cursor: pointer; touch-action: none; overflow: hidden; }
-        .wave-fill { position: absolute; width: 100%; height: 100%; background: #fff; border-radius: 50%; transform: scale(0); transform-origin: center; transition: transform 0.1s linear; pointer-events: none; z-index: 2011; }
-        .wave-text { position: relative; z-index: 2012; font-weight: bold; color: #fff; letter-spacing: 2px; mix-blend-mode: difference; pointer-events: none; }
+        .wave-circle { width: 160px; height: 160px; border: 6px solid #fff; border-radius: 50%; margin-top: 30px; position: relative; display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.1); z-index: 2200; cursor: pointer; touch-action: none; overflow: hidden; }
+        .wave-fill { position: absolute; width: 100%; height: 100%; background: #fff; border-radius: 50%; transform: scale(0); transform-origin: center; transition: transform 0.1s linear; pointer-events: none; }
+        .wave-text { position: relative; z-index: 2210; font-weight: bold; color: #fff; letter-spacing: 2px; mix-blend-mode: difference; pointer-events: none; }
 
-        /* 웹 페이지 전체로 퍼지는 파동 고리 */
+        /* 전체 화면 확산 파동 고리 (수정된 z-index) */
         .expanding-ring { 
             position: fixed; 
             width: 100px; height: 100px; 
-            border: 8px solid var(--wave-color); 
+            border: 6px solid var(--wave-color); 
             border-radius: 50%; 
             pointer-events: none; 
-            z-index: 1999; /* 버튼 아래, 배경 위 */
+            z-index: 2500; /* 레이어보다 높게, 텍스트보다 높게 */
             transform: translate(-50%, -50%) scale(0);
             opacity: 1;
             will-change: transform, opacity;
-            animation: ring-out-massive 2.5s cubic-bezier(0.1, 0.2, 0.3, 1) forwards;
+            animation: ring-out-massive 2s cubic-bezier(0.2, 0.5, 0.3, 1) forwards;
         }
         @keyframes ring-out-massive {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; border-width: 10px; }
@@ -75,7 +75,7 @@
         .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.8s; }
         #pokemon-img { width: 220px; height: 220px; filter: drop-shadow(0 0 15px var(--wave-color)); opacity: 0; transition: opacity 0.8s; margin: 15px 0; }
 
-        .audio-ctrl { position: fixed; bottom: 25px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; gap: 15px; color: #94a3b8; z-index: 3000; }
+        .audio-ctrl { position: fixed; bottom: 25px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; gap: 15px; color: #94a3b8; z-index: 4000; }
         input[type=range] { accent-color: var(--border-green); width: 80px; }
 
         .hidden { display: none !important; }
@@ -311,16 +311,15 @@
             showScan();
         },
 
-        // 웹 페이지 전체로 퍼지는 파동 생성
+        // 수정된 파동 생성 함수 (body 기준 절대 좌표 사용)
         spawnOutwardRing(x, y) {
             const ring = document.createElement("div");
             ring.className = "expanding-ring";
             ring.style.left = x + "px";
             ring.style.top = y + "px";
-            ring.style.borderColor = this.waveColors[this.state.finalNature];
+            ring.style.borderColor = this.waveColors[this.state.finalNature] || "#fff";
             document.body.appendChild(ring);
-            // 애니메이션이 끝나면 DOM에서 제거 (최적화)
-            setTimeout(() => ring.remove(), 2600);
+            setTimeout(() => { if(ring.parentNode) ring.remove(); }, 2100);
         },
 
         setupWave() {
@@ -332,22 +331,19 @@
                 if (e.cancelable) e.preventDefault();
                 if (this.state.pressTimer) return;
 
-                // 버튼의 화면상 중앙 좌표 계산
+                // 좌표 계산 정밀화
                 const rect = trigger.getBoundingClientRect();
                 const centerX = rect.left + rect.width / 2;
                 const centerY = rect.top + rect.height / 2;
 
-                // 즉시 첫 파동 생성
                 this.spawnOutwardRing(centerX, centerY);
                 
-                // 0.6초마다 새로운 거대 파동 생성
                 this.state.ringInterval = setInterval(() => {
                     this.spawnOutwardRing(centerX, centerY);
-                }, 600);
+                }, 500);
 
-                // 버튼 중앙 스케일 충전 애니메이션
                 this.state.pressTimer = setInterval(() => {
-                    progress += 1.5;
+                    progress += 1.6;
                     fill.style.transform = `scale(${progress / 100})`;
                     
                     if (navigator.vibrate) navigator.vibrate(10);
@@ -368,6 +364,8 @@
             
             trigger.onpointerdown = onStart;
             window.onpointerup = onEnd;
+            // 모바일 멀티터치 등 예외 처리
+            window.onpointercancel = onEnd;
         },
 
         cleanupWave() {
@@ -419,8 +417,11 @@
 
         async shareResult(nature, poke) {
             const text = `[포켓몬 성격 테스트]\n나의 성격: ${nature}\n닮은 포켓몬: ${poke}\n테스트 하기: ${window.location.href}`;
-            if (navigator.share) await navigator.share({ title: '성격 테스트', text, url: window.location.href });
-            else { navigator.clipboard.writeText(text); alert("복사되었습니다!"); }
+            if (navigator.share) {
+                try { await navigator.share({ title: '성격 테스트', text, url: window.location.href }); } catch(e) {}
+            } else { 
+                navigator.clipboard.writeText(text); alert("복사되었습니다!"); 
+            }
         },
 
         toggleMute() {
