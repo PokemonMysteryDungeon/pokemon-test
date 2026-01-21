@@ -95,7 +95,7 @@
         }
         .wave-fill { position: absolute; width: 0%; height: 0%; background: var(--wave-color); border-radius: 50%; opacity: 0.7; transition: 0.1s linear; }
 
-        .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.8s; max-height: 80vh; overflow-y: auto; }
+        .result-layout { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.8s; max-height: 85vh; overflow-y: auto; padding: 5px; }
         .result-desc { font-size: 1.05rem; line-height: 1.8; margin-bottom: 20px; color: #cbd5e1; word-break: keep-all; max-width: 95%; text-align: center; }
         #pokemon-img { width: 160px; height: 160px; margin: 10px 0; object-fit: contain; filter: drop-shadow(0 0 15px var(--wave-color)); }
 
@@ -142,11 +142,20 @@
 </div>
 
 <script>
-    // --- 방대한 질문 데이터 (65개) ---
+    const INTRO_TEXTS = [
+        "어서 오너라!",
+        "여기는 포켓몬들의 세계로\n통하는 입구다!",
+        "이 문 너머에는 네가 상상하지 못한\n다양한 모험이 기다리고 있을 것이다!",
+        "하지만 모험에 나서기 전에\n너에게 몇 가지 질문이 있다.",
+        "솔직하게 대답해 주길 바란다.",
+        "준비는 되었는가?",
+        "그럼... 질문 시작하겠다!"
+    ];
+
     const ALL_QUESTIONS = [
         { q: "휴일인데 아무도 놀아 주지 않는다... 그럼 당신은?", a: [{t: "여행을 떠난다", s: {Jolly: 4, Rash: 2}}, {t: "멍하게 있는다", s: {Relaxed: 4, Calm: 2}}, {t: "방구석에 박혀있는다", s: {Lonely: 4, Quiet: 2}}] },
         { q: "비밀을 무심코 누설해버린 적이 있는가?", a: [{t: "있다", s: {Rash: 4, Lonely: 4}}, {t: "없다", s: {Hardy: 2}}] },
-        { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "절반은 쓰고 절반은 모은다", s: {Calm: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
+        { q: "용돈 관리는 어떻게 하는가?", a: [{t: "꾸준히 모으고 있다", s: {Hardy: 4}}, {t: "금방 써버린다", s: {Quirky: 4, Hasty: 2}}, {t: "절반은 쓰고 전달은 모은다", s: {Calm: 2}}, {t: "받지 않는다...", s: {Lonely: 4}}] },
         { q: "매일 복근 운동 10회. 계속할 수 있을까?", a: [{t: "이 정도는 누워서 떡 먹기다", s: {Impish: 4, Sassy: 2}}, {t: "열심히 해 본다", s: {Hardy: 4}}, {t: "처음부터 할 생각이 없다", s: {Quirky: 4}}] },
         { q: "모르는 것은 모른다고 솔직하게 말할 수 있는가?", a: [{t: "말할 수 있다", s: {Docile: 4, Bold: 2}}, {t: "잘 말하지 못한다", s: {Timid: 4, Lonely: 2}}] },
         { q: "장래를 점쳐 보니 결과가 매우 나빴다. 너라면?", a: [{t: "매우 불안해진다", s: {Docile: 4, Timid: 2}}, {t: "잊어버린다", s: {Jolly: 4, Relaxed: 2, Bold: 2}}] },
@@ -216,17 +225,6 @@
     const ID_MAP = { "아차모": 255, "파이리": 4, "피카츄": 25, "리아코": 158, "팽도리": 393, "불꽃숭이": 390, "모부기": 387, "브케인": 155, "에나비": 300, "냐옹": 52, "나무지기": 252, "먹고자": 446, "물짱이": 258, "꼬부기": 7, "이상해씨": 1, "치코리타": 152, "식스테일": 37 };
     const WAVE_COLORS = { Hardy: { color: "#ff4d4d", name: "정열적인 레드" }, Brave: { color: "#ff4d4d", name: "정열적인 레드" }, Rash: { color: "#ff4d4d", name: "정열적인 레드" }, Jolly: { color: "#ff80df", name: "귀여운 핑크" }, Naive: { color: "#ff80df", name: "귀여운 핑크" }, Relaxed: { color: "#33ccff", name: "맑은 스카이블루" }, Quiet: { color: "#33ccff", name: "맑은 스카이블루" }, Calm: { color: "#3366ff", name: "깊은 로열블루" }, Timid: { color: "#ffa31a", name: "따뜻한 오렌지" }, Hasty: { color: "#ffa31a", name: "따뜻한 오렌지" }, Sassy: { color: "#cc66ff", name: "신비로운 퍼플" }, Quirky: { color: "#cc66ff", name: "신비로운 퍼플" }, Bold: { color: "#ffff33", name: "눈부신 골드" }, Impish: { color: "#ffff33", name: "눈부신 골드" }, Docile: { color: "#38f838", name: "청명한 에메랄드" }, Lonely: { color: "#38f838", name: "청명한 에메랄드" } };
 
-    const INTRO_TEXTS = [
-        "어서 오너라!",
-        "여기는 포켓몬들의 세계로\n통하는 입구다!",
-        "이 문 너머에는 네가 상상하지 못한\n다양한 모험이 기다리고 있을 것이다!",
-        "하지만 모험에 나서기 전에\n너에게 몇 가지 질문이 있다.",
-        "솔직하게 대답해 주길 바란다.",
-        "준비는 되었는가?",
-        "그럼... 질문 시작하겠다!"
-    ];
-
-    // --- 앱 상태 관리 ---
     let typingTimer = null, isTyping = false, currentFullText = "", introIdx = 0, currentIdx = 0, scores = {}, testPool = [], userGender = '', finalNature = "", player = null, userChoices = [];
 
     function onYouTubeIframeAPIReady() {
@@ -265,12 +263,8 @@
         if (callback) callback();
     }
 
-    // 인트로 버튼 이벤트 리스너 최적화
     document.getElementById("intro-next-btn").addEventListener("click", () => {
-        if (isTyping) {
-            completeTyping("intro-text");
-            return;
-        }
+        if (isTyping) { completeTyping("intro-text"); return; }
         if (introIdx === 0 && player && player.playVideo) player.playVideo();
         if (introIdx < INTRO_TEXTS.length) {
             typeWriter(INTRO_TEXTS[introIdx], "intro-text");
@@ -295,7 +289,6 @@
     function setGender(gender) {
         userGender = gender; currentIdx = 0; userChoices = [];
         Object.keys(KOREAN_TYPE_MAP).forEach(k => scores[k] = 0);
-        // 전체 65개 질문 중 무작위 20개 선정 (원작 사양)
         testPool = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 20);
         render();
     }
@@ -314,7 +307,7 @@
                 btn.onclick = () => { 
                     if (isTyping) return; 
                     for (let s in ans.s) scores[s] = (scores[s] || 0) + ans.s[s]; 
-                    userChoices.push(ans.t);
+                    userChoices.push({ q: data.q, a: ans.t }); // 질문과 답변을 함께 저장
                     currentIdx++; render(); 
                 };
                 document.getElementById("answer-box").appendChild(btn);
@@ -366,16 +359,18 @@
         const natureName = KOREAN_TYPE_MAP[finalNature], resultName = POKEMON_MAP[userGender][finalNature], pokeId = ID_MAP[resultName];
         document.getElementById("answer-box").innerHTML = "";
         
-        // 사용자가 선택한 답변 중 무작위 2개 추출
-        const sampledChoices = [...userChoices].sort(() => 0.5 - Math.random()).slice(0, 2);
+        // 사용자가 한 대답 중 랜덤하게 2개를 골라 구체적으로 인용
+        const sampled = [...userChoices].sort(() => 0.5 - Math.random()).slice(0, 2);
         
         typeWriter(`...너의 선택들을 곰곰이 지켜보았단다.`, "text-display", () => {
             setTimeout(() => {
                 document.getElementById("question-box").innerHTML = `
                     <div class="result-layout">
                         <div class="result-desc">
-                            너는 아까 질문에서<br>'<span style="color:var(--wave-color)">${sampledChoices[0]}</span>'거나,<br> 
-                            '<span style="color:var(--wave-color)">${sampledChoices[1]}</span>'는 쪽을 택하더구나.<br><br>
+                            너는 아까 질문 중 하나였던<br>'<span style="color:var(--wave-color)">${sampled[0].q}</span>'에 대해<br> 
+                            '${sampled[0].a}'라고 말했었지.<br><br>
+                            또한 '<span style="color:var(--wave-color)">${sampled[1].q}</span>'라는 물음에는<br>
+                            '${sampled[1].a}'라고 대답하더구나.<br><br>
                             그걸 보니 너는 아무래도...<br>[${natureName}] 성격인 거 같아.
                         </div>
                         <div style="color:var(--wave-color); font-weight:bold; margin-top:10px;">그런 [${natureName}] 성격인 너는...</div>
