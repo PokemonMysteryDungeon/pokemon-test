@@ -28,7 +28,7 @@
         }
 
         #game-container { width: 92%; max-width: 440px; z-index: 10; position: relative; padding-bottom: env(safe-area-inset-bottom); }
-        .window { background: var(--window-bg); border: 4px solid var(--border-green); border-radius: 12px; box-shadow: 0 10px 30px var(--shadow); padding: 20px; position: relative; }
+        .window { background: var(--window-bg); border: 4px solid var(--border-green); border-radius: 12px; box-shadow: 0 10px 30px var(--shadow); padding: 22px; position: relative; }
 
         #intro-layer { position: fixed; inset: 0; background: #000; z-index: 9000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; }
         #wave-layer { position: fixed; inset: 0; background: radial-gradient(circle at center, #1a202c 0%, #000 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 8000; transition: opacity 0.6s; visibility: hidden; opacity: 0; }
@@ -36,14 +36,15 @@
 
         #intro-text-box { min-height: 140px; display: flex; align-items: center; justify-content: center; text-align: center; width: 100%; }
         
-        /* 텍스트 컨테이너 및 커서 버그 수정 */
-        .text-wrapper { display: inline; position: relative; }
+        /* 텍스트 컨테이너 최적화: 줄 바꿈 및 커서 정렬 */
         #text-display, #intro-text { 
-            font-size: clamp(1.05rem, 4vw, 1.2rem); 
+            font-size: clamp(1.05rem, 4.2vw, 1.25rem); 
             line-height: 1.8; 
             word-break: keep-all; 
             overflow-wrap: break-word;
             text-align: center;
+            display: inline-block;
+            max-width: 100%;
         }
 
         #testing-ui { display: flex; flex-direction: column; min-height: 500px; }
@@ -62,11 +63,12 @@
             background: rgba(255,255,255,0.05); border: 2px solid #334155; color: var(--text-white); 
             font-family: inherit; font-size: 0.95rem; text-align: left; padding: 14px 15px 14px 42px; 
             cursor: pointer; position: relative; border-radius: 10px; transition: 0.2s; width: 100%;
+            line-height: 1.4;
         }
         .btn-choice::before { content: '▶'; position: absolute; left: 15px; color: var(--border-green); }
         .btn-choice:active { border-color: var(--border-green); background: rgba(56, 248, 56, 0.15); }
         
-        .progress-bar { height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; margin-bottom: 15px; }
+        .progress-bar { height: 10px; background: #1e293b; border-radius: 5px; overflow: hidden; margin-bottom: 15px; }
         #progress-fill { height: 100%; background: linear-gradient(90deg, #166534, var(--border-green)); width: 0%; transition: width 0.4s ease-out; }
         
         .wave-circle { width: 150px; height: 150px; border: 6px solid #fff; border-radius: 50%; margin-top: 30px; position: relative; display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.1); z-index: 8500; touch-action: none; overflow: hidden; }
@@ -84,7 +86,16 @@
         input[type=range] { accent-color: var(--border-green); width: 80px; cursor: pointer; }
 
         .hidden { display: none !important; }
-        .typing-cursor::after { content: ' ▼'; animation: blink 0.8s infinite; color: var(--border-green); display: inline-block; vertical-align: middle; }
+        
+        /* 커서 최적화: 마지막 글자와 한 몸처럼 움직이게 설정 */
+        .typing-cursor::after { 
+            content: '▼'; 
+            animation: blink 0.8s infinite; 
+            color: var(--border-green); 
+            display: inline-block; 
+            margin-left: 4px;
+            white-space: nowrap;
+        }
         @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
     </style>
 </head>
@@ -92,24 +103,24 @@
 <div id="player"></div>
 
 <div id="intro-layer">
-    <div id="intro-text-box"><span id="intro-text" class="text-wrapper"></span></div>
+    <div id="intro-text-box"><span id="intro-text"></span></div>
     <button class="btn-center" id="intro-next-btn">▶ 다음</button>
 </div>
 
 <div id="game-container" class="hidden">
     <div id="testing-ui">
-        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.8rem; color:var(--border-green); padding:0 4px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.85rem; color:var(--border-green); padding:0 4px;">
             <span>성격 진단 중...</span> <span id="step-count">0 / 20</span>
         </div>
         <div class="progress-bar"><div id="progress-fill"></div></div>
-        <div id="question-box" class="window"><span id="text-display" class="text-wrapper"></span></div>
+        <div id="question-box" class="window"><span id="text-display"></span></div>
         <div id="answer-box"></div>
     </div>
     <div id="result-ui" class="window hidden"><div id="result-display"></div></div>
 </div>
 
 <div id="wave-layer">
-    <div id="wave-msg" style="text-align:center; line-height:1.8;"></div>
+    <div id="wave-msg" style="text-align:center; line-height:1.8; font-size:1.1rem; padding: 0 20px;"></div>
     <div class="wave-circle hidden" id="wave-trigger">
         <div class="wave-fill" id="wave-fill"></div>
         <span class="wave-text">PUSH</span>
@@ -118,7 +129,7 @@
 </div>
 
 <div class="audio-ctrl">
-    <span id="mute-btn" style="cursor:pointer; padding:5px;">🔊</span>
+    <span id="mute-btn" style="cursor:pointer; padding:5px; font-size:1.2rem;">🔊</span>
     <input type="range" id="volume-slider" min="0" max="100" value="30">
 </div>
 
@@ -247,8 +258,13 @@
             const type = () => {
                 if (i < text.length) {
                     const char = text.charAt(i++);
-                    if (char === '\n') el.innerHTML += '<br>';
-                    else el.appendChild(document.createTextNode(char));
+                    if (char === '\n') {
+                        const br = document.createElement('br');
+                        el.appendChild(br);
+                    } else {
+                        const node = document.createTextNode(char);
+                        el.appendChild(node);
+                    }
                     this.state.typingTimer = setTimeout(type, 35);
                 } else {
                     this.state.isTyping = false;
@@ -262,8 +278,13 @@
         handleIntroNext() {
             if (this.state.isTyping) {
                 clearTimeout(this.state.typingTimer); this.state.isTyping = false;
-                document.getElementById("intro-text").innerHTML = this.state.currentFullText.replace(/\n/g, '<br>');
-                document.getElementById("intro-text").classList.add('typing-cursor');
+                const el = document.getElementById("intro-text");
+                el.innerHTML = "";
+                this.state.currentFullText.split('').forEach(char => {
+                   if(char === '\n') el.appendChild(document.createElement('br'));
+                   else el.appendChild(document.createTextNode(char));
+                });
+                el.classList.add('typing-cursor');
                 return;
             }
             if (this.state.introIdx === 0 && this.state.player?.playVideo) {
@@ -297,7 +318,6 @@
                         this.state.isTransitioning = true;
                         for (let s in ans.s) this.state.scores[s] = (this.state.scores[s] || 0) + ans.s[s];
                         
-                        // 결과창 필터링을 위해 기여한 성격 목록을 함께 저장
                         this.state.userChoices.push({ 
                             q: data.q.split('\n')[0], 
                             a: ans.t,
@@ -393,7 +413,6 @@
             const natureName = this.natureMap[finalNature];
             const poke = this.pokemonMap[this.state.userGender][finalNature];
             
-            // 최종 성격에 점수를 기여한 질문들 중에서만 랜덤으로 선택
             const relevantChoices = this.state.userChoices.filter(choice => choice.natures.includes(finalNature));
             const sampled = relevantChoices.length > 0 
                 ? relevantChoices[Math.floor(Math.random() * relevantChoices.length)] 
