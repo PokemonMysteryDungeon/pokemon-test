@@ -37,7 +37,6 @@
 
         #intro-text-box { min-height: 140px; display: flex; align-items: center; justify-content: center; text-align: center; width: 100%; }
         
-        /* 텍스트 컨테이너 고도화: 커서 정렬과 줄바꿈 동시 해결 */
         #text-display, #intro-text { 
             font-size: clamp(1.05rem, 4.2vw, 1.25rem); 
             line-height: 1.8; 
@@ -46,7 +45,7 @@
             text-align: center;
             display: inline-block;
             max-width: 100%;
-            white-space: pre-wrap; /* \n 대응 */
+            white-space: pre-wrap;
         }
 
         #testing-ui { display: flex; flex-direction: column; min-height: 500px; }
@@ -76,7 +75,6 @@
         .wave-circle { width: 150px; height: 150px; border: 6px solid #fff; border-radius: 50%; margin-top: 30px; position: relative; display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.1); z-index: 8500; touch-action: none; overflow: hidden; }
         .wave-fill { position: absolute; inset: 0; background: #fff; border-radius: 50%; transform: scale(0); transform-origin: center; pointer-events: none; }
         
-        /* 뮤 전용 무지개 애니메이션 */
         .wave-fill.mew { background: linear-gradient(45deg, #ff80df, #80ffff, #fff, #ff80df); background-size: 300% 300%; animation: rainbow 2s linear infinite; }
         @keyframes rainbow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
@@ -92,13 +90,13 @@
 
         .hidden { display: none !important; }
         
-        /* 화살표 위치 정밀 수정: 텍스트 직후에 딱 붙음 */
+        /* 화살표 위치 정밀 수정 */
         .typing-cursor::after { 
             content: '▼'; 
             animation: blink 0.8s infinite; 
             color: var(--border-green); 
             display: inline-block; 
-            margin-left: 2px;
+            margin-left: 3px;
             white-space: nowrap;
             vertical-align: middle;
         }
@@ -384,18 +382,16 @@
                 this.state.pressTimer = setInterval(() => {
                     progress += 1.8;
                     
+                    // 100% 도달 시 "손을 떼세요" 안내로 심리적 유도
                     if (progress >= 100 && !this.state.isMewTriggered) {
-                         if(!this.dom.waveTrigger.classList.contains('hidden')) {
-                             this.dom.waveMsg.innerHTML = "파동 감지 중...<br><span style='font-size:0.8rem; color:#94a3b8;'>(더 강하게 집중해 주세요...)</span>";
-                         }
+                         this.dom.waveMsg.innerHTML = "<span style='color:var(--accent-yellow)'>감지 완료!</span><br>이제 손을 떼 주십시오.";
                     }
 
-                    // 이스터 에그: 10초 더 누르기 (기존 100% 이후 10초 = 약 285틱 추가)
-                    // 총합 613틱 이상 도달 시 트리거
+                    // 100% 도달 후 10초(약 650틱 지점) 더 누를 시 뮤 트리거
                     if (progress >= 650 && !this.state.isMewTriggered) {
                         this.state.isMewTriggered = true;
                         fill.classList.add('mew');
-                        this.dom.waveMsg.innerHTML = "<span style='color:#ff80df; text-shadow:0 0 10px #ff80df;'>싱크로율 한계 돌파!!</span><br>알 수 없는 환상의 파동이 느껴집니다!";
+                        this.dom.waveMsg.innerHTML = "<span style='color:#ff80df; text-shadow:0 0 10px #ff80df;'>싱크로율 한계 돌파!!</span><br>환상의 파동과 공명 중입니다...";
                         if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
                     }
 
@@ -422,7 +418,7 @@
                 this.state.finalNature = "Mythical";
                 document.documentElement.style.setProperty('--wave-color', '#ff80df');
             } else {
-                this.dom.waveMsg.innerHTML = `<span style="color:var(--accent-yellow)">파동 감지 완료!</span><br>당신의 기운이 느껴집니다...`;
+                this.dom.waveMsg.innerHTML = `<span style="color:var(--accent-yellow)">감지 결과가 준비되었습니다.</span><br>당신의 기운이 느껴집니다...`;
             }
             setTimeout(() => { this.dom.waveNextBtn.classList.remove("hidden"); }, 800);
         },
