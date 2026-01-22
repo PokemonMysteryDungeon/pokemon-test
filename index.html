@@ -12,6 +12,7 @@
             --window-bg: #1a202c; --border-green: #38f838; --wave-color: #38f838; 
             --text-white: #ffffff; --bg-dark: #0a0e17; --bg-grid: rgba(56, 248, 56, 0.06); 
             --accent-yellow: #f8f838; --shadow: rgba(0, 0, 0, 0.6);
+            --mew-pink: #ff80df;
         }
         
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; -webkit-user-select: none; user-select: none; }
@@ -36,7 +37,7 @@
 
         #intro-text-box { min-height: 140px; display: flex; align-items: center; justify-content: center; text-align: center; width: 100%; }
         
-        /* 텍스트 컨테이너 최적화: 줄 바꿈 및 커서 정렬 */
+        /* 텍스트 컨테이너 고도화: 커서 정렬과 줄바꿈 동시 해결 */
         #text-display, #intro-text { 
             font-size: clamp(1.05rem, 4.2vw, 1.25rem); 
             line-height: 1.8; 
@@ -45,6 +46,7 @@
             text-align: center;
             display: inline-block;
             max-width: 100%;
+            white-space: pre-wrap; /* \n 대응 */
         }
 
         #testing-ui { display: flex; flex-direction: column; min-height: 500px; }
@@ -73,7 +75,10 @@
         
         .wave-circle { width: 150px; height: 150px; border: 6px solid #fff; border-radius: 50%; margin-top: 30px; position: relative; display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.1); z-index: 8500; touch-action: none; overflow: hidden; }
         .wave-fill { position: absolute; inset: 0; background: #fff; border-radius: 50%; transform: scale(0); transform-origin: center; pointer-events: none; }
-        .wave-text { position: relative; z-index: 8600; font-weight: bold; color: #fff; letter-spacing: 2px; mix-blend-mode: difference; }
+        
+        /* 뮤 전용 무지개 애니메이션 */
+        .wave-fill.mew { background: linear-gradient(45deg, #ff80df, #80ffff, #fff, #ff80df); background-size: 300% 300%; animation: rainbow 2s linear infinite; }
+        @keyframes rainbow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         .expanding-ring { position: fixed; width: 100px; height: 100px; border: 6px solid var(--wave-color); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%) scale(0); will-change: transform, opacity; animation: ring-out 2.2s cubic-bezier(0.1, 0.3, 0.2, 1) forwards; }
         @keyframes ring-out { 0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; border-width: 15px; } 100% { transform: translate(-50%, -50%) scale(30); opacity: 0; border-width: 1px; } }
@@ -87,14 +92,15 @@
 
         .hidden { display: none !important; }
         
-        /* 커서 최적화: 마지막 글자와 한 몸처럼 움직이게 설정 */
+        /* 화살표 위치 정밀 수정: 텍스트 직후에 딱 붙음 */
         .typing-cursor::after { 
             content: '▼'; 
             animation: blink 0.8s infinite; 
             color: var(--border-green); 
             display: inline-block; 
-            margin-left: 4px;
+            margin-left: 2px;
             white-space: nowrap;
+            vertical-align: middle;
         }
         @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
     </style>
@@ -202,19 +208,19 @@
             { q: "마라톤 골인 직전! 너무 괴롭다면?", a: [{t: "완주한다", s: {Hardy: 4, Brave: 2}}, {t: "포기한다", s: {Quirky: 4}}, {t: "지름길로 간다", s: {Bold: 4, Rash: 2}}] },
             { q: "길에서 좋은 냄새가 난다!", a: [{t: "상상한다", s: {Docile: 4}}, {t: "따라간다", s: {Naive: 4, Rash: 2}}, {t: "배가 고파진다", s: {Impish: 4}}] }
         ],
-        natureMap: { Lonely: "고독한", Docile: "온순한", Quirky: "변덕스러운", Brave: "용감한", Sassy: "건방진", Calm: "차분한", Timid: "소심한", Jolly: "유쾌한", Quiet: "내성적", Hardy: "강건한", Rash: "무모한", Hasty: "조급한", Bold: "과감한", Naive: "순진한", Impish: "장난꾸러기", Relaxed: "느긋한" },
+        natureMap: { Lonely: "고독한", Docile: "온순한", Quirky: "변덕스러운", Brave: "용감한", Sassy: "건방진", Calm: "차분한", Timid: "소심한", Jolly: "유쾌한", Quiet: "내성적", Hardy: "강건한", Rash: "무모한", Hasty: "조급한", Bold: "과감한", Naive: "순진한", Impish: "장난꾸러기", Relaxed: "느긋한", Mythical: "신비로운" },
         pokemonMap: { 
-            male: { Lonely: "이상해씨", Docile: "파이리", Quirky: "꼬부기", Brave: "피카츄", Sassy: "냐옹", Calm: "치코리타", Timid: "브케인", Jolly: "리아코", Quiet: "나무지기", Hardy: "아차모", Rash: "물짱이", Hasty: "에나비", Bold: "모부기", Naive: "불꽃숭이", Impish: "팽도리", Relaxed: "먹고자" }, 
-            female: { Docile: "이상해씨", Brave: "파이리", Bold: "꼬부기", Hasty: "피카츄", Sassy: "리아코", Quiet: "치코리타", Calm: "브케인", Hardy: "나무지기", Rash: "아차모", Lonely: "물짱이", Naive: "에나비", Timid: "모부기", Impish: "불꽃숭이", Quirky: "팽도리", Jolly: "먹고자", Relaxed: "식스테일" } 
+            male: { Lonely: "이상해씨", Docile: "파이리", Quirky: "꼬부기", Brave: "피카츄", Sassy: "냐옹", Calm: "치코리타", Timid: "브케인", Jolly: "리아코", Quiet: "나무지기", Hardy: "아차모", Rash: "물짱이", Hasty: "에나비", Bold: "모부기", Naive: "불꽃숭이", Impish: "팽도리", Relaxed: "먹고자", Mythical: "뮤" }, 
+            female: { Docile: "이상해씨", Brave: "파이리", Bold: "꼬부기", Hasty: "피카츄", Sassy: "리아코", Quiet: "치코리타", Calm: "브케인", Hardy: "나무지기", Rash: "아차모", Lonely: "물짱이", Naive: "에나비", Timid: "모부기", Impish: "불꽃숭이", Quirky: "팽도리", Jolly: "먹고자", Relaxed: "식스테일", Mythical: "뮤" } 
         },
-        pokeIdMap: { "아차모": 255, "파이리": 4, "피카츄": 25, "리아코": 158, "팽도리": 393, "불꽃숭이": 390, "모부기": 387, "브케인": 155, "에나비": 300, "냐옹": 52, "나무지기": 252, "먹고자": 446, "물짱이": 258, "꼬부기": 7, "이상해씨": 1, "치코리타": 152, "식스테일": 37 },
-        waveColors: { Hardy: "#ff4d4d", Brave: "#ff4d4d", Rash: "#ff4d4d", Jolly: "#ff80df", Naive: "#ff80df", Relaxed: "#33ccff", Quiet: "#33ccff", Calm: "#3366ff", Timid: "#ffa31a", Hasty: "#ffa31a", Sassy: "#cc66ff", Quirky: "#cc66ff", Bold: "#ffff33", Impish: "#ffff33", Docile: "#38f838", Lonely: "#38f838" },
+        pokeIdMap: { "아차모": 255, "파이리": 4, "피카츄": 25, "리아코": 158, "팽도리": 393, "불꽃숭이": 390, "모부기": 387, "브케인": 155, "에나비": 300, "냐옹": 52, "나무지기": 252, "먹고자": 446, "물짱이": 258, "꼬부기": 7, "이상해씨": 1, "치코리타": 152, "식스테일": 37, "뮤": 151 },
+        waveColors: { Hardy: "#ff4d4d", Brave: "#ff4d4d", Rash: "#ff4d4d", Jolly: "#ff80df", Naive: "#ff80df", Relaxed: "#33ccff", Quiet: "#33ccff", Calm: "#3366ff", Timid: "#ffa31a", Hasty: "#ffa31a", Sassy: "#cc66ff", Quirky: "#cc66ff", Bold: "#ffff33", Impish: "#ffff33", Docile: "#38f838", Lonely: "#38f838", Mythical: "#ff80df" },
 
         state: { 
             typingTimer: null, isTyping: false, currentFullText: "", introIdx: 0, 
             currentIdx: 0, scores: {}, testPool: [], userGender: 'male', 
             finalNature: "", userChoices: [], player: null, isTransitioning: false, 
-            ringInterval: null, pressTimer: null, vibrateInterval: null 
+            ringInterval: null, pressTimer: null, vibrateInterval: null, isMewTriggered: false
         },
 
         init() {
@@ -259,11 +265,9 @@
                 if (i < text.length) {
                     const char = text.charAt(i++);
                     if (char === '\n') {
-                        const br = document.createElement('br');
-                        el.appendChild(br);
+                        el.appendChild(document.createElement('br'));
                     } else {
-                        const node = document.createTextNode(char);
-                        el.appendChild(node);
+                        el.appendChild(document.createTextNode(char));
                     }
                     this.state.typingTimer = setTimeout(type, 35);
                 } else {
@@ -317,13 +321,11 @@
                         if(this.state.isTransitioning) return;
                         this.state.isTransitioning = true;
                         for (let s in ans.s) this.state.scores[s] = (this.state.scores[s] || 0) + ans.s[s];
-                        
                         this.state.userChoices.push({ 
                             q: data.q.split('\n')[0], 
                             a: ans.t,
                             natures: Object.keys(ans.s)
                         });
-                        
                         this.state.currentIdx++; this.renderQuestion();
                         setTimeout(() => { this.state.isTransitioning = false; }, 300);
                     };
@@ -361,11 +363,11 @@
             showScan();
         },
 
-        spawnRing(x, y) {
+        spawnRing(x, y, isMew = false) {
             const ring = document.createElement("div");
             ring.className = "expanding-ring";
             ring.style.left = x + "px"; ring.style.top = y + "px";
-            ring.style.borderColor = this.waveColors[this.state.finalNature];
+            ring.style.borderColor = isMew ? "#ff80df" : this.waveColors[this.state.finalNature];
             document.body.appendChild(ring);
             setTimeout(() => ring.remove(), 2200);
         },
@@ -377,14 +379,37 @@
                 const rect = trigger.getBoundingClientRect();
                 const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
                 this.spawnRing(cx, cy);
-                this.state.ringInterval = setInterval(() => this.spawnRing(cx, cy), 500);
+                this.state.ringInterval = setInterval(() => this.spawnRing(cx, cy, this.state.isMewTriggered), 500);
                 this.state.vibrateInterval = setInterval(() => { if (navigator.vibrate) navigator.vibrate(15); }, 100);
                 this.state.pressTimer = setInterval(() => {
-                    progress += 2; fill.style.transform = `scale(${Math.min(progress / 100, 1.1)})`;
-                    if (progress >= 105) { this.cleanupWave(); this.completeWave(); }
-                }, 30);
+                    progress += 1.8;
+                    
+                    if (progress >= 100 && !this.state.isMewTriggered) {
+                         if(!this.dom.waveTrigger.classList.contains('hidden')) {
+                             this.dom.waveMsg.innerHTML = "파동 감지 중...<br><span style='font-size:0.8rem; color:#94a3b8;'>(더 강하게 집중해 주세요...)</span>";
+                         }
+                    }
+
+                    // 이스터 에그: 10초 더 누르기 (기존 100% 이후 10초 = 약 285틱 추가)
+                    // 총합 613틱 이상 도달 시 트리거
+                    if (progress >= 650 && !this.state.isMewTriggered) {
+                        this.state.isMewTriggered = true;
+                        fill.classList.add('mew');
+                        this.dom.waveMsg.innerHTML = "<span style='color:#ff80df; text-shadow:0 0 10px #ff80df;'>싱크로율 한계 돌파!!</span><br>알 수 없는 환상의 파동이 느껴집니다!";
+                        if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+                    }
+
+                    fill.style.transform = `scale(${Math.min(progress / 100, 1.25)})`;
+                }, 35);
             };
-            const onEnd = () => { if(progress < 100) { this.cleanupWave(); progress = 0; fill.style.transform = "scale(0)"; } };
+            const onEnd = () => { 
+                this.cleanupWave();
+                if(progress >= 100) {
+                    this.completeWave();
+                } else {
+                    progress = 0; fill.style.transform = "scale(0)"; 
+                }
+            };
             trigger.onpointerdown = onStart; window.onpointerup = onEnd;
         },
 
@@ -393,7 +418,12 @@
         completeWave() {
             if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
             this.dom.waveTrigger.classList.add("hidden");
-            this.dom.waveMsg.innerHTML = `<span style="color:var(--accent-yellow)">파동 감지 완료!</span><br>당신의 기운이 느껴집니다...`;
+            if(this.state.isMewTriggered) {
+                this.state.finalNature = "Mythical";
+                document.documentElement.style.setProperty('--wave-color', '#ff80df');
+            } else {
+                this.dom.waveMsg.innerHTML = `<span style="color:var(--accent-yellow)">파동 감지 완료!</span><br>당신의 기운이 느껴집니다...`;
+            }
             setTimeout(() => { this.dom.waveNextBtn.classList.remove("hidden"); }, 800);
         },
 
@@ -413,24 +443,41 @@
             const natureName = this.natureMap[finalNature];
             const poke = this.pokemonMap[this.state.userGender][finalNature];
             
-            const relevantChoices = this.state.userChoices.filter(choice => choice.natures.includes(finalNature));
-            const sampled = relevantChoices.length > 0 
-                ? relevantChoices[Math.floor(Math.random() * relevantChoices.length)] 
-                : this.state.userChoices[0];
-            
-            document.getElementById("result-display").innerHTML = `
-                <div class="result-layout">
-                    <div style="text-align:center; line-height:1.7; margin-bottom:20px; font-size:1.05rem; padding:0 5px; word-break:keep-all;">
-                        '${sampled.q}'에 대해<br>'<span style="color:var(--accent-yellow)">${sampled.a}</span>'라고 답한 당신은...<br><br>
-                        [<span style="color:var(--accent-yellow)">${natureName}</span>] 성격인 것 같아!
+            let resultHtml = "";
+
+            if(this.state.isMewTriggered) {
+                resultHtml = `
+                    <div class="result-layout">
+                        <div style="text-align:center; line-height:1.7; margin-bottom:20px; font-size:1.05rem; padding:0 5px; word-break:keep-all;">
+                            모든 질문의 경계를 넘어<br>환상과 공명한 당신은...<br><br>
+                            [<span style="color:#ff80df; text-shadow:0 0 5px #ff80df;">${natureName}</span>] 존재인 것 같아!
+                        </div>
+                        <div style="color:#ff80df; font-size:0.9rem;">당신과 운명으로 이어진 포켓몬은...</div>
+                        <div style="font-size:2.4rem; border-bottom:3px solid #ff80df; margin:10px 0; text-shadow:0 0 15px #ff80df; color:#fff;">뮤</div>
+                        <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/151.png" alt="뮤">
+                        <button class="btn-center" onclick="location.reload()">▶ 다시 하기</button>
+                        <button class="btn-center" id="share-btn" style="background:rgba(255,128,223,0.15); margin-top:10px; border-color:#ff80df;">▶ 결과 공유</button>
                     </div>
-                    <div style="color:var(--border-green); font-size:0.9rem;">당신과 닮은 포켓몬은...</div>
-                    <div style="font-size:2.2rem; border-bottom:3px solid var(--border-green); margin:10px 0; text-shadow:0 0 10px var(--wave-color);">${poke}</div>
-                    <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${this.pokeIdMap[poke]}.png" alt="${poke}">
-                    <button class="btn-center" onclick="location.reload()">▶ 다시 하기</button>
-                    <button class="btn-center" id="share-btn" style="background:rgba(56,248,56,0.15); margin-top:10px; border-color:var(--wave-color);">▶ 결과 공유</button>
-                </div>
-            `;
+                `;
+            } else {
+                const relevantChoices = this.state.userChoices.filter(choice => choice.natures.includes(finalNature));
+                const sampled = relevantChoices.length > 0 ? relevantChoices[Math.floor(Math.random() * relevantChoices.length)] : this.state.userChoices[0];
+                resultHtml = `
+                    <div class="result-layout">
+                        <div style="text-align:center; line-height:1.7; margin-bottom:20px; font-size:1.05rem; padding:0 5px; word-break:keep-all;">
+                            '${sampled.q}'에 대해<br>'<span style="color:var(--accent-yellow)">${sampled.a}</span>'라고 답한 당신은...<br><br>
+                            [<span style="color:var(--accent-yellow)">${natureName}</span>] 성격인 것 같아!
+                        </div>
+                        <div style="color:var(--border-green); font-size:0.9rem;">당신과 닮은 포켓몬은...</div>
+                        <div style="font-size:2.2rem; border-bottom:3px solid var(--border-green); margin:10px 0; text-shadow:0 0 10px var(--wave-color);">${poke}</div>
+                        <img id="pokemon-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${this.pokeIdMap[poke]}.png" alt="${poke}">
+                        <button class="btn-center" onclick="location.reload()">▶ 다시 하기</button>
+                        <button class="btn-center" id="share-btn" style="background:rgba(56,248,56,0.15); margin-top:10px; border-color:var(--wave-color);">▶ 결과 공유</button>
+                    </div>
+                `;
+            }
+            
+            document.getElementById("result-display").innerHTML = resultHtml;
             const img = document.getElementById("pokemon-img");
             img.onload = () => { img.style.opacity = 1; };
             document.getElementById("share-btn").onclick = () => this.shareResult(natureName, poke);
